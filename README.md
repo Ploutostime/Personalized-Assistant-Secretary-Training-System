@@ -1,98 +1,202 @@
+# 智学秘伴 - 学生事务管理系统
+
 ## 介绍
 
-项目介绍
+智学秘伴是一个智能化的学生事务管理与学习效率提升系统，帮助学生高效收纳和整理各类学习事务，生成个性化时间表，并通过智能提醒引导学生快速进入学习状态。
 
-## 目录结构
+## 核心功能
 
-```
-├── README.md # 说明文档
-├── components.json # 组件库配置
-├── index.html # 入口文件
-├── package.json # 包管理
-├── postcss.config.js # postcss 配置
-├── public # 静态资源目录
-│   ├── favicon.png # 图标
-│   └── images # 图片资源
-├── src # 源码目录
-│   ├── App.tsx # 入口文件
-│   ├── components # 组件目录
-│   ├── contexts # 上下文目录
-│   ├── db # 数据库配置目录
-│   ├── hooks # 通用钩子函数目录
-│   ├── index.css # 全局样式
-│   ├── layout # 布局目录
-│   ├── lib # 工具库目录
-│   ├── main.tsx # 入口文件
-│   ├── routes.tsx # 路由配置
-│   ├── pages # 页面目录
-│   ├── services  # 数据库交互目录
-│   ├── types   # 类型定义目录
-├── tsconfig.app.json  # ts 前端配置文件
-├── tsconfig.json # ts 配置文件
-├── tsconfig.node.json # ts node端配置文件
-└── vite.config.ts # vite 配置文件
-```
+### 1. 学生事务管理
+- 竞赛日程记录与提醒
+- 作业安排整理与截止时间管理
+- 时间管控功能，设置学习时长目标
+- 时间协调，自动安排学习计划
+- 考研考级相关信息管理
+- 日程规划与任务优先级设定
+
+### 2. 时间表生成
+- 自动生成个性化时间表
+- 周视图展示学习计划
+- 实时更新和同步
+
+### 3. 智能提醒功能
+- 任务截止时间提醒
+- 知识点复习提醒
+- 学习状态智能识别
+
+### 4. 效率提升工具
+- 学习时间统计和分析
+- 学习习惯养成提醒
+- 知识点收藏和复习提醒
+- 数据可视化图表展示
+
+### 5. 管理员功能
+- 用户管理
+- 角色权限管理
+- 系统数据统计
+
+## 设计特色
+
+- **配色方案**：采用深蓝色(#1E3A8A)与绿色(#10B981)搭配，营造专业而富有活力的学习氛围
+- **视觉风格**：现代扁平化设计，8px圆角处理，柔和阴影效果增强层次感
+- **布局设计**：左侧导航栏+主内容区域的经典布局，响应式设计支持移动端访问
+
+## 使用说明
+
+### 首次使用
+
+1. 访问系统后，点击"注册"创建账号
+2. 第一个注册的用户将自动成为管理员
+3. 使用用户名和密码登录系统
+
+### 事务管理
+
+1. 在"事务管理"页面点击"新建任务"
+2. 填写任务信息：标题、描述、类型、优先级、截止时间等
+3. 系统会根据截止时间和优先级自动安排到时间表中
+4. 可以随时更新任务状态或编辑任务信息
+
+### 知识收藏
+
+1. 在"知识收藏"页面点击"新建知识点"
+2. 记录重要的学习知识点，可添加标签和来源链接
+3. 点击"复习"按钮记录复习次数
+4. 系统会根据间隔重复算法提醒复习时间
+
+### 学习统计
+
+- 查看总学习时长、完成任务数等统计数据
+- 查看本周学习时长趋势图
+- 查看任务类型分布图
+- 获取个性化学习建议
+
+### 时间表设置
+
+1. 在"设置"页面配置学习偏好
+2. 设置每日学习目标时长
+3. 设置偏好的学习时间段
+4. 配置休息时长和提醒选项
 
 ## 技术栈
 
-Vite、TypeScript、React、Supabase
+- **前端框架**：React 18 + TypeScript
+- **构建工具**：Vite
+- **UI组件库**：shadcn/ui + Tailwind CSS
+- **路由管理**：React Router
+- **数据可视化**：Recharts
+- **后端服务**：Supabase (数据库 + 认证)
+- **日期处理**：date-fns
 
 ## 本地开发
-
-### 如何在本地编辑代码？
-
-您可以选择 [VSCode](https://code.visualstudio.com/Download) 或者您常用的任何 IDE 编辑器，唯一的要求是安装 Node.js 和 npm.
 
 ### 环境要求
 
 ```
-# Node.js ≥ 20
-# npm ≥ 10
+Node.js ≥ 20
+npm ≥ 10
 例如：
-# node -v   # v20.18.3
-# npm -v    # 10.8.2
+node -v   # v20.18.3
+npm -v    # 10.8.2
 ```
 
-具体安装步骤如下：
+### 安装步骤
 
-### 在 Windows 上安装 Node.js
-
-```
-# Step 1: 访问Node.js官网：https://nodejs.org/，点击下载后，会根据你的系统自动选择合适的版本（32位或64位）。
-# Step 2: 运行安装程序：下载完成后，双击运行安装程序。
-# Step 3: 完成安装：按照安装向导完成安装过程。
-# Step 4: 验证安装：在命令提示符（cmd）或IDE终端（terminal）中输入 node -v 和 npm -v 来检查 Node.js 和 npm 是否正确安装。
-```
-
-### 在 macOS 上安装 Node.js
-
-```
-# Step 1: 使用Homebrew安装（推荐方法）：打开终端。输入命令brew install node并回车。如果尚未安装Homebrew，需要先安装Homebrew，
-可以通过在终端中运行如下命令来安装：
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-或者使用官网安装程序：访问Node.js官网。下载macOS的.pkg安装包。打开下载的.pkg文件，按照提示完成安装。
-# Step 2: 验证安装：在命令提示符（cmd）或IDE终端（terminal）中输入 node -v 和 npm -v 来检查 Node.js 和 npm 是否正确安装。
-```
-
-### 安装完后按照如下步骤操作：
-
-```
+```bash
 # Step 1: 下载代码包
 # Step 2: 解压代码包
 # Step 3: 用IDE打开代码包，进入代码目录
-# Step 4: IDE终端输入命令行，安装依赖：npm i
-# Step 5: IDE终端输入命令行，启动开发服务器：npm run dev -- --host 127.0.0.1
+
+# Step 4: 安装依赖
+npm install
+
+# Step 5: 启动开发服务器
+npm run dev -- --host 127.0.0.1
 ```
 
-### 如何开发后端服务？
+### 数据库配置
 
-配置环境变量，安装相关依赖
-如需使用数据库，请使用 supabase 官方版本或自行部署开源版本的 Supabase
+本项目使用 Supabase 作为后端服务，数据库已自动配置。如需了解更多：
 
-### 如何配置应用中的三方 API？
+- 数据库表结构定义在 `supabase/migrations` 目录
+- 数据库API封装在 `src/db/api.ts`
+- 认证配置在 `src/contexts/AuthContext.tsx`
 
-具体三方 API 调用方法，请参考帮助文档：[源码导出](https://cloud.baidu.com/doc/MIAODA/s/Xmewgmsq7)，了解更多详细内容。
+## 数据库结构
+
+### 主要数据表
+
+1. **profiles** - 用户配置表
+   - 存储用户基本信息和角色权限
+   
+2. **tasks** - 学生事务表
+   - 存储竞赛、作业、考试等各类学习任务
+   
+3. **knowledge_items** - 知识点收藏表
+   - 存储学习知识点和复习记录
+   
+4. **study_sessions** - 学习时间记录表
+   - 记录学习时长和学习内容
+   
+5. **schedule_settings** - 时间表配置表
+   - 存储用户的学习偏好设置
+
+## 安全说明
+
+- 使用 Supabase Row Level Security (RLS) 保护数据安全
+- 用户只能访问和修改自己的数据
+- 管理员拥有额外的用户管理权限
+- 密码使用 Supabase Auth 加密存储
+
+## 目录结构
+
+```
+├── README.md                   # 说明文档
+├── components.json             # 组件库配置
+├── index.html                  # 入口文件
+├── package.json                # 包管理
+├── postcss.config.js           # postcss 配置
+├── public                      # 静态资源目录
+│   ├── favicon.png            # 图标
+│   └── images                 # 图片资源
+├── src                         # 源码目录
+│   ├── App.tsx                # 应用入口
+│   ├── components             # 组件目录
+│   │   ├── common            # 通用组件
+│   │   ├── layouts           # 布局组件
+│   │   └── ui                # UI组件库
+│   ├── contexts               # 上下文目录
+│   │   └── AuthContext.tsx   # 认证上下文
+│   ├── db                     # 数据库配置目录
+│   │   ├── api.ts            # 数据库API封装
+│   │   └── supabase.ts       # Supabase客户端
+│   ├── hooks                  # 通用钩子函数目录
+│   ├── index.css              # 全局样式
+│   ├── lib                    # 工具库目录
+│   ├── main.tsx               # 入口文件
+│   ├── routes.tsx             # 路由配置
+│   ├── pages                  # 页面目录
+│   │   ├── DashboardPage.tsx # 仪表盘
+│   │   ├── TasksPage.tsx     # 事务管理
+│   │   ├── SchedulePage.tsx  # 时间表
+│   │   ├── KnowledgePage.tsx # 知识收藏
+│   │   ├── StatisticsPage.tsx# 学习统计
+│   │   ├── SettingsPage.tsx  # 设置
+│   │   ├── AdminPage.tsx     # 管理员面板
+│   │   └── LoginPage.tsx     # 登录页面
+│   └── types                  # 类型定义目录
+│       └── types.ts          # TypeScript类型定义
+├── supabase                   # Supabase配置目录
+│   └── migrations            # 数据库迁移文件
+├── tsconfig.app.json          # ts 前端配置文件
+├── tsconfig.json              # ts 配置文件
+├── tsconfig.node.json         # ts node端配置文件
+└── vite.config.ts             # vite 配置文件
+```
 
 ## 了解更多
 
 您也可以查看帮助文档：[源码导出](https://cloud.baidu.com/doc/MIAODA/s/Xmewgmsq7)，了解更多详细内容。
+
+## 版权信息
+
+© 2025 智学秘伴
