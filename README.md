@@ -230,10 +230,103 @@ npm run dev -- --host 127.0.0.1
 └── vite.config.ts             # vite 配置文件
 ```
 
-## 了解更多
+## 📚 项目文档
 
-您也可以查看帮助文档：[源码导出](https://cloud.baidu.com/doc/MIAODA/s/Xmewgmsq7)，了解更多详细内容。
+本项目提供完整的技术文档，帮助您快速了解和开发：
+
+### 核心文档
+
+1. **[README.md](./README.md)** - 项目说明文档（本文件）
+   - 功能介绍
+   - 使用说明
+   - 技术栈
+   - 快速开始
+
+2. **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - 项目结构文档
+   - 完整的目录树结构
+   - 核心模块详细说明
+   - 数据库结构说明
+   - 设计系统规范
+   - 开发指南
+
+3. **[CODE_DOCUMENTATION.md](./CODE_DOCUMENTATION.md)** - 完整代码文档
+   - 所有核心代码文件
+   - 配置文件详解
+   - 类型定义完整代码
+   - 数据库 API 实现
+   - 页面组件代码
+   - 数据库迁移 SQL
+
+4. **[CODE_INDEX.md](./CODE_INDEX.md)** - 代码索引文档
+   - 文件清单和统计
+   - 快速查找指南
+   - 代码复杂度分析
+   - 开发建议
+
+5. **[TODO.md](./TODO.md)** - 任务清单
+   - 开发任务记录
+   - 功能完成情况
+   - 注意事项
+
+### 文档使用建议
+
+- **新手入门：** 先阅读 README.md，了解项目功能和使用方法
+- **开发人员：** 查看 PROJECT_STRUCTURE.md 了解项目架构
+- **代码查找：** 使用 CODE_INDEX.md 快速定位文件
+- **代码参考：** 查看 CODE_DOCUMENTATION.md 获取完整代码
+- **任务追踪：** 查看 TODO.md 了解开发进度
+
+## 🎯 快速链接
+
+### 开发相关
+- [Supabase 文档](https://supabase.com/docs)
+- [React 文档](https://react.dev/)
+- [Tailwind CSS 文档](https://tailwindcss.com/docs)
+- [shadcn/ui 文档](https://ui.shadcn.com/)
+
+### 帮助文档
+- [源码导出说明](https://cloud.baidu.com/doc/MIAODA/s/Xmewgmsq7)
+
+## 🤝 贡献指南
+
+欢迎提交问题和改进建议！
+
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 📝 更新日志
+
+### v1.0.0 (2025-12-17)
+
+**新增功能：**
+- ✨ 私人终端 - 视频推荐系统
+- ✨ 根据专业智能推荐 Bilibili 学术视频
+- ✨ 视频收藏和观看历史功能
+- ✨ 专业标签管理（30+预置专业）
+- ✨ 用户偏好设置
+
+**优化改进：**
+- 🎨 仪表盘添加视频推荐卡片
+- 🎨 设置页面添加个人信息配置
+- 🎨 设置页面添加视频偏好设置
+- 🎨 优化空状态提示和引导
+- 🎨 完善响应式布局
+
+**核心功能：**
+- ✅ 学生事务管理系统
+- ✅ 智能时间表生成
+- ✅ 知识点收藏与复习
+- ✅ 学习数据统计分析
+- ✅ 用户认证和权限管理
+- ✅ 主题切换（亮色/暗色）
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。
 
 ## 版权信息
 
-© 2025 智学秘伴
+© 2025 智学秘伴. All rights reserved.
