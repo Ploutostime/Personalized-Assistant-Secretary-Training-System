@@ -6,9 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getScheduleSettings, updateScheduleSettings } from '@/db/api';
-import type { ScheduleSettings } from '@/types/types';
-import { Settings as SettingsIcon, Clock, Save } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { getScheduleSettings, updateScheduleSettings, getProfile, updateProfile, getMajorTags, getUserPreferences, updateUserPreferences } from '@/db/api';
+import type { ScheduleSettings, MajorTag, UserPreferences } from '@/types/types';
+import { Settings as SettingsIcon, Clock, Save, User, Video, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
@@ -16,6 +24,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<ScheduleSettings | null>(null);
+  const [majorTags, setMajorTags] = useState<MajorTag[]>([]);
 
   const [formData, setFormData] = useState({
     daily_study_goal_hours: '8',
@@ -23,6 +32,18 @@ export default function SettingsPage() {
     preferred_end_time: '22:00',
     break_duration_minutes: '15',
     auto_schedule_enabled: true,
+  });
+
+  const [profileData, setProfileData] = useState({
+    major: '',
+    grade: '',
+  });
+
+  const [videoPreferences, setVideoPreferences] = useState({
+    auto_recommend: true,
+    daily_recommendation_count: 5,
+    preferred_duration_min: null as number | null,
+    preferred_duration_max: null as number | null,
   });
 
   useEffect(() => {
@@ -33,18 +54,48 @@ export default function SettingsPage() {
   const loadSettings = async () => {
     if (!user) return;
     setLoading(true);
-    const data = await getScheduleSettings(user.id);
-    if (data) {
-      setSettings(data);
-      setFormData({
-        daily_study_goal_hours: data.daily_study_goal_hours.toString(),
-        preferred_start_time: data.preferred_start_time,
-        preferred_end_time: data.preferred_end_time,
-        break_duration_minutes: data.break_duration_minutes.toString(),
-        auto_schedule_enabled: data.auto_schedule_enabled,
-      });
+    try {
+      const [scheduleData, profileInfo, tags, preferences] = await Promise.all([
+        getScheduleSettings(user.id),
+        getProfile(user.id),
+        getMajorTags(),
+        getUserPreferences(user.id),
+      ]);
+
+      if (scheduleData) {
+        setSettings(scheduleData);
+        setFormData({
+          daily_study_goal_hours: scheduleData.daily_study_goal_hours.toString(),
+          preferred_start_time: scheduleData.preferred_start_time,
+          preferred_end_time: scheduleData.preferred_end_time,
+          break_duration_minutes: scheduleData.break_duration_minutes.toString(),
+          auto_schedule_enabled: scheduleData.auto_schedule_enabled,
+        });
+      }
+
+      if (profileInfo) {
+        setProfileData({
+          major: profileInfo.major || '',
+          grade: profileInfo.grade || '',
+        });
+      }
+
+      setMajorTags(tags);
+
+      if (preferences) {
+        setVideoPreferences({
+          auto_recommend: preferences.auto_recommend,
+          daily_recommendation_count: preferences.daily_recommendation_count,
+          preferred_duration_min: preferences.preferred_duration_min,
+          preferred_duration_max: preferences.preferred_duration_max,
+        });
+      }
+    } catch (error) {
+      console.error('加载设置失败:', error);
+      toast.error('加载设置失败');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +131,48 @@ export default function SettingsPage() {
       loadSettings();
     } else {
       toast.error('设置保存失败');
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setSaving(true);
+    const success = await updateProfile(user.id, {
+      major: profileData.major || null,
+      grade: profileData.grade || null,
+    });
+
+    setSaving(false);
+
+    if (success) {
+      toast.success('个人信息保存成功');
+      loadSettings();
+    } else {
+      toast.error('个人信息保存失败');
+    }
+  };
+
+  const handleVideoPreferencesSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setSaving(true);
+    const success = await updateUserPreferences(user.id, {
+      auto_recommend: videoPreferences.auto_recommend,
+      daily_recommendation_count: videoPreferences.daily_recommendation_count,
+      preferred_duration_min: videoPreferences.preferred_duration_min,
+      preferred_duration_max: videoPreferences.preferred_duration_max,
+    });
+
+    setSaving(false);
+
+    if (success) {
+      toast.success('视频偏好保存成功');
+      loadSettings();
+    } else {
+      toast.error('视频偏好保存失败');
     }
   };
 
@@ -193,6 +286,131 @@ export default function SettingsPage() {
               <Button type="submit" disabled={saving}>
                 <Save className="mr-2 h-4 w-4" />
                 {saving ? '保存中...' : '保存设置'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* 个人信息设置 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            个人信息
+          </CardTitle>
+          <CardDescription>设置您的专业和年级信息</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="major">专业</Label>
+              <Select
+                value={profileData.major}
+                onValueChange={(value) => setProfileData({ ...profileData, major: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择专业" />
+                </SelectTrigger>
+                <SelectContent>
+                  {majorTags.map((tag) => (
+                    <SelectItem key={tag.id} value={tag.name}>
+                      {tag.name} {tag.category && `(${tag.category})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                设置专业后可获得个性化视频推荐
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="grade">年级</Label>
+              <Select
+                value={profileData.grade}
+                onValueChange={(value) => setProfileData({ ...profileData, grade: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择年级" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="大一">大一</SelectItem>
+                  <SelectItem value="大二">大二</SelectItem>
+                  <SelectItem value="大三">大三</SelectItem>
+                  <SelectItem value="大四">大四</SelectItem>
+                  <SelectItem value="研一">研一</SelectItem>
+                  <SelectItem value="研二">研二</SelectItem>
+                  <SelectItem value="研三">研三</SelectItem>
+                  <SelectItem value="博士">博士</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving}>
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? '保存中...' : '保存信息'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* 视频推荐偏好 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Video className="h-5 w-5 text-primary" />
+            视频推荐偏好
+          </CardTitle>
+          <CardDescription>自定义视频推荐设置</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleVideoPreferencesSubmit} className="space-y-6">
+            <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto_recommend">自动推荐</Label>
+                <p className="text-sm text-muted-foreground">
+                  根据您的专业自动推荐相关视频
+                </p>
+              </div>
+              <Switch
+                id="auto_recommend"
+                checked={videoPreferences.auto_recommend}
+                onCheckedChange={(checked) =>
+                  setVideoPreferences({ ...videoPreferences, auto_recommend: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="daily_count">每日推荐数量</Label>
+              <Select
+                value={videoPreferences.daily_recommendation_count.toString()}
+                onValueChange={(value) =>
+                  setVideoPreferences({
+                    ...videoPreferences,
+                    daily_recommendation_count: parseInt(value),
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 个</SelectItem>
+                  <SelectItem value="5">5 个</SelectItem>
+                  <SelectItem value="10">10 个</SelectItem>
+                  <SelectItem value="15">15 个</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving}>
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? '保存中...' : '保存偏好'}
               </Button>
             </div>
           </form>

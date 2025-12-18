@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getUpcomingTasks, getReviewDueItems, getStudyStats } from '@/db/api';
-import type { Task, KnowledgeItem } from '@/types/types';
-import { Clock, ListTodo, BookMarked, TrendingUp, AlertCircle, CheckCircle2, Calendar } from 'lucide-react';
+import { getUpcomingTasks, getReviewDueItems, getStudyStats, getVideoRecommendations, getProfile } from '@/db/api';
+import type { Task, KnowledgeItem, VideoRecommendation } from '@/types/types';
+import { Clock, ListTodo, BookMarked, TrendingUp, AlertCircle, CheckCircle2, Calendar, Video, Play, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
@@ -38,6 +38,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([]);
   const [reviewItems, setReviewItems] = useState<KnowledgeItem[]>([]);
+  const [recommendedVideos, setRecommendedVideos] = useState<VideoRecommendation[]>([]);
+  const [userMajor, setUserMajor] = useState<string>('');
   const [stats, setStats] = useState({
     totalHours: 0,
     completedTasks: 0,
@@ -51,15 +53,19 @@ export default function DashboardPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [tasks, items, statistics] = await Promise.all([
+        const [tasks, items, statistics, profile, videos] = await Promise.all([
           getUpcomingTasks(user.id, 7),
           getReviewDueItems(user.id),
           getStudyStats(user.id),
+          getProfile(user.id),
+          getVideoRecommendations(user.id, { is_watched: false }),
         ]);
 
         setUpcomingTasks(tasks.slice(0, 5));
         setReviewItems(items.slice(0, 5));
         setStats(statistics);
+        setUserMajor(profile?.major || '');
+        setRecommendedVideos(videos.slice(0, 3));
       } catch (error) {
         console.error('加载数据失败:', error);
       } finally {
@@ -237,6 +243,95 @@ export default function DashboardPage() {
                         )}
                         <span>已复习 {item.review_count} 次</span>
                       </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 推荐视频 */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5 text-primary" />
+                  推荐视频
+                  {userMajor && (
+                    <Badge variant="outline" className="ml-2">
+                      {userMajor}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {userMajor ? '根据您的专业推荐' : '设置专业后获得精准推荐'}
+                </CardDescription>
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/video-terminal">查看全部</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!userMajor ? (
+              <div className="text-center py-8">
+                <Video className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground mb-4">设置您的专业信息，获得个性化视频推荐</p>
+                <Button asChild>
+                  <Link to="/video-terminal">立即设置</Link>
+                </Button>
+              </div>
+            ) : recommendedVideos.length === 0 ? (
+              <div className="text-center py-8">
+                <Video className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground mb-4">暂无推荐视频</p>
+                <Button asChild variant="outline">
+                  <Link to="/video-terminal">添加视频</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recommendedVideos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
+                  >
+                    {video.video_cover && (
+                      <div className="relative w-32 h-20 rounded overflow-hidden shrink-0 bg-muted">
+                        <img
+                          src={video.video_cover}
+                          alt={video.video_title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Play className="h-8 w-8 text-white" />
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium line-clamp-2 mb-1">{video.video_title}</h4>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {video.author && <span>{video.author}</span>}
+                        {video.tags && video.tags.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {video.tags[0]}
+                            </Badge>
+                          </>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="mt-2 h-7 text-xs"
+                        onClick={() => window.open(video.video_url, '_blank')}
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        观看视频
+                      </Button>
                     </div>
                   </div>
                 ))}
