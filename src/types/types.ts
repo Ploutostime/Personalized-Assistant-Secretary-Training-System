@@ -17,6 +17,9 @@ export interface Profile {
   email: string | null;
   role: UserRole;
   avatar_url: string | null;
+  major: string | null;
+  grade: string | null;
+  interests: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -91,4 +94,64 @@ export interface StudyStats {
   knowledgeItems: number;
   weeklyHours: number[];
   tasksByType: Record<TaskType, number>;
+}
+
+// 专业标签接口
+export interface MajorTag {
+  id: string;
+  name: string;
+  category: string | null;
+  description: string | null;
+  created_at: string;
+}
+
+// 视频推荐接口
+export interface VideoRecommendation {
+  id: string;
+  user_id: string;
+  video_id: string;
+  video_title: string;
+  video_url: string;
+  video_cover: string | null;
+  author: string | null;
+  duration: number | null;
+  view_count: number | null;
+  tags: string[] | null;
+  description: string | null;
+  recommended_reason: string | null;
+  is_watched: boolean;
+  is_favorited: boolean;
+  watch_progress: number;
+  watched_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 视频观看历史接口
+export interface VideoWatchHistory {
+  id: string;
+  user_id: string;
+  video_id: string;
+  video_title: string;
+  video_url: string;
+  watch_duration: number | null;
+  watch_progress: number | null;
+  completed: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 用户偏好设置接口
+export interface UserPreferences {
+  id: string;
+  user_id: string;
+  preferred_tags: string[] | null;
+  excluded_tags: string[] | null;
+  preferred_duration_min: number | null;
+  preferred_duration_max: number | null;
+  auto_recommend: boolean;
+  daily_recommendation_count: number;
+  created_at: string;
+  updated_at: string;
 }

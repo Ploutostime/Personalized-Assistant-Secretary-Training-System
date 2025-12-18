@@ -8,6 +8,10 @@ import type {
   TaskType,
   PriorityLevel,
   TaskStatus,
+  MajorTag,
+  VideoRecommendation,
+  VideoWatchHistory,
+  UserPreferences,
 } from '@/types/types';
 
 // ==================== Profiles ====================
@@ -416,4 +420,198 @@ export async function getStudyStats(userId: string) {
     weeklyHours: weeklyHours.map(h => Math.round(h * 10) / 10),
     tasksByType,
   };
+}
+
+// ==================== Major Tags ====================
+
+export async function getMajorTags(): Promise<MajorTag[]> {
+  const { data, error } = await supabase
+    .from('major_tags')
+    .select('*')
+    .order('category', { ascending: true });
+
+  if (error) {
+    console.error('获取专业标签失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// ==================== Video Recommendations ====================
+
+export async function getVideoRecommendations(
+  userId: string,
+  filters?: { is_favorited?: boolean; is_watched?: boolean }
+): Promise<VideoRecommendation[]> {
+  let query = supabase
+    .from('video_recommendations')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (filters?.is_favorited !== undefined) {
+    query = query.eq('is_favorited', filters.is_favorited);
+  }
+  if (filters?.is_watched !== undefined) {
+    query = query.eq('is_watched', filters.is_watched);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('获取视频推荐失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getVideoRecommendation(videoId: string): Promise<VideoRecommendation | null> {
+  const { data, error } = await supabase
+    .from('video_recommendations')
+    .select('*')
+    .eq('id', videoId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('获取视频详情失败:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function createVideoRecommendation(
+  video: Omit<VideoRecommendation, 'id' | 'created_at' | 'updated_at'>
+): Promise<VideoRecommendation | null> {
+  const { data, error } = await supabase
+    .from('video_recommendations')
+    .insert(video)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('创建视频推荐失败:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function updateVideoRecommendation(
+  videoId: string,
+  updates: Partial<VideoRecommendation>
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('video_recommendations')
+    .update(updates)
+    .eq('id', videoId);
+
+  if (error) {
+    console.error('更新视频推荐失败:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function deleteVideoRecommendation(videoId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('video_recommendations')
+    .delete()
+    .eq('id', videoId);
+
+  if (error) {
+    console.error('删除视频推荐失败:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function toggleVideoFavorite(videoId: string, isFavorited: boolean): Promise<boolean> {
+  return updateVideoRecommendation(videoId, { is_favorited: isFavorited });
+}
+
+export async function markVideoAsWatched(videoId: string, progress: number = 100): Promise<boolean> {
+  return updateVideoRecommendation(videoId, {
+    is_watched: true,
+    watch_progress: progress,
+    watched_at: new Date().toISOString(),
+  });
+}
+
+// ==================== Video Watch History ====================
+
+export async function getVideoWatchHistory(userId: string): Promise<VideoWatchHistory[]> {
+  const { data, error } = await supabase
+    .from('video_watch_history')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('获取观看历史失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createVideoWatchHistory(
+  history: Omit<VideoWatchHistory, 'id' | 'created_at' | 'updated_at'>
+): Promise<VideoWatchHistory | null> {
+  const { data, error } = await supabase
+    .from('video_watch_history')
+    .insert(history)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('创建观看历史失败:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function updateVideoWatchHistory(
+  historyId: string,
+  updates: Partial<VideoWatchHistory>
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('video_watch_history')
+    .update(updates)
+    .eq('id', historyId);
+
+  if (error) {
+    console.error('更新观看历史失败:', error);
+    return false;
+  }
+  return true;
+}
+
+// ==================== User Preferences ====================
+
+export async function getUserPreferences(userId: string): Promise<UserPreferences | null> {
+  const { data, error } = await supabase
+    .from('user_preferences')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('获取用户偏好失败:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function updateUserPreferences(
+  userId: string,
+  updates: Partial<UserPreferences>
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('user_preferences')
+    .update(updates)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('更新用户偏好失败:', error);
+    return false;
+  }
+  return true;
 }

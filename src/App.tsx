@@ -9,6 +9,7 @@ import KnowledgePage from './pages/KnowledgePage';
 import StatisticsPage from './pages/StatisticsPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
+import VideoTerminalPage from './pages/VideoTerminalPage';
 import MainLayout from './components/layouts/MainLayout';
 
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
               <Route path="tasks" element={<TasksPage />} />
               <Route path="schedule" element={<SchedulePage />} />
               <Route path="knowledge" element={<KnowledgePage />} />
+              <Route path="video-terminal" element={<VideoTerminalPage />} />
               <Route path="statistics" element={<StatisticsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="admin" element={<AdminPage />} />
