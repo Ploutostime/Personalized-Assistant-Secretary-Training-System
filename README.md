@@ -242,14 +242,21 @@ npm run dev -- --host 127.0.0.1
    - 技术栈
    - 快速开始
 
-2. **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - 项目结构文档
+2. **[PRODUCT_INTRODUCTION.md](./PRODUCT_INTRODUCTION.md)** - 产品介绍文档 ⭐ 推荐
+   - 完整的产品介绍
+   - 核心功能详解
+   - 应用场景实例
+   - 产品愿景与规划
+   - 用户价值与社会意义
+
+3. **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - 项目结构文档
    - 完整的目录树结构
    - 核心模块详细说明
    - 数据库结构说明
    - 设计系统规范
    - 开发指南
 
-3. **[CODE_DOCUMENTATION.md](./CODE_DOCUMENTATION.md)** - 完整代码文档
+4. **[CODE_DOCUMENTATION.md](./CODE_DOCUMENTATION.md)** - 完整代码文档
    - 所有核心代码文件
    - 配置文件详解
    - 类型定义完整代码
@@ -257,16 +264,27 @@ npm run dev -- --host 127.0.0.1
    - 页面组件代码
    - 数据库迁移 SQL
 
-4. **[CODE_INDEX.md](./CODE_INDEX.md)** - 代码索引文档
+5. **[CODE_INDEX.md](./CODE_INDEX.md)** - 代码索引文档
    - 文件清单和统计
    - 快速查找指南
    - 代码复杂度分析
    - 开发建议
 
-5. **[TODO.md](./TODO.md)** - 任务清单
+6. **[FEATURE_COVERAGE.md](./FEATURE_COVERAGE.md)** - 功能覆盖对照表
+   - 产品愿景 vs 实现状态
+   - 8大核心功能详细对照
+   - 功能实现统计（100%覆盖）
+   - 产品特色实现说明
+
+7. **[TODO.md](./TODO.md)** - 任务清单
    - 开发任务记录
    - 功能完成情况
    - 注意事项
+
+8. **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - 文档导航中心
+   - 所有文档的总索引
+   - 按使用场景提供阅读建议
+   - 文档统计和快速链接
 
 ### 文档使用建议
 
