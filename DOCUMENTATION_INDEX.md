@@ -125,6 +125,29 @@
 
 ---
 
+### 6. 🎯 [FEATURE_COVERAGE.md](./FEATURE_COVERAGE.md) - 功能覆盖对照表 ⭐ 新增
+**适合人群：** 产品经理、项目负责人、用户
+
+**内容概览：**
+- ✅ 产品愿景 vs 实现状态对照
+- ✅ 8大核心功能详细对照
+- ✅ 功能实现统计（100%覆盖）
+- ✅ 产品特色实现说明
+- ✅ 功能亮点评级
+- ✅ 技术实现优势
+- ✅ 功能扩展建议
+
+**文档大小：** 12 KB  
+**阅读时间：** 约 20 分钟
+
+**何时查看：**
+- 需要验证产品需求实现情况时
+- 需要向用户展示功能完整性时
+- 需要评估产品完成度时
+- 需要规划功能扩展时
+
+---
+
 ## 🎯 使用场景指南
 
 ### 场景 1：我是新手，第一次接触项目
@@ -186,7 +209,8 @@
 | CODE_DOCUMENTATION.md | 49 KB | 60 分钟 | 2025-12-17 |
 | CODE_INDEX.md | 14 KB | 15 分钟 | 2025-12-17 |
 | TODO.md | 2.4 KB | 5 分钟 | 2025-12-17 |
-| **总计** | **97.4 KB** | **2 小时** | - |
+| FEATURE_COVERAGE.md | 12 KB | 20 分钟 | 2025-12-17 |
+| **总计** | **109.4 KB** | **2.3 小时** | - |
 
 ---
 
@@ -198,6 +222,7 @@
 - [CODE_DOCUMENTATION.md](./CODE_DOCUMENTATION.md)
 - [CODE_INDEX.md](./CODE_INDEX.md)
 - [TODO.md](./TODO.md)
+- [FEATURE_COVERAGE.md](./FEATURE_COVERAGE.md) ⭐ 新增
 
 ### 外部资源
 - [Supabase 文档](https://supabase.com/docs)
@@ -252,6 +277,7 @@
 - ✅ 生成 CODE_INDEX.md
 - ✅ 更新 TODO.md
 - ✅ 创建 DOCUMENTATION_INDEX.md
+- ✅ 创建 FEATURE_COVERAGE.md（功能覆盖对照表）
 
 ---
 
