@@ -197,6 +197,12 @@ export function FloatingSecretary() {
     return config.avatar.avatar_url;
   };
 
+  // 获取全身立绘图片
+  const getFullBodyImage = () => {
+    if (!config?.avatar || !config.avatar.full_body_url) return null;
+    return config.avatar.full_body_url;
+  };
+
   // 如果未启用或不可见，不渲染
   if (!config || !config.enabled || !isVisible || !user) {
     return null;
@@ -277,6 +283,19 @@ export function FloatingSecretary() {
           </div>
 
           <div className="p-4 max-w-xs">
+            {/* 全身人物显示 */}
+            {getFullBodyImage() && (
+              <div className="mb-3 flex justify-center">
+                <div className="w-28 h-36 flex items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-primary/5 to-secondary/10">
+                  <img 
+                    src={getFullBodyImage()!} 
+                    alt={config.name}
+                    className="h-full w-auto object-contain object-bottom"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* 对话气泡 */}
             <div className="relative bg-background/80 rounded-lg p-3 shadow-sm">
               <p className="text-sm leading-relaxed">{currentMessage}</p>

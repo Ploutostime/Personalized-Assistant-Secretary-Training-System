@@ -97,6 +97,12 @@ export function SecretaryAssistant() {
     return config.avatar.avatar_url;
   };
 
+  // 获取全身立绘图片
+  const getFullBodyImage = () => {
+    if (!config.avatar || !config.avatar.full_body_url) return null;
+    return config.avatar.full_body_url;
+  };
+
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-secondary/5">
       <CardHeader>
@@ -116,19 +122,29 @@ export function SecretaryAssistant() {
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
-          {/* 秘书形象 */}
+          {/* 秘书全身形象 */}
           <div className="flex-shrink-0">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
-              {getAvatarImage() ? (
+            {getFullBodyImage() ? (
+              <div className="w-32 h-48 flex items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-primary/5 to-secondary/10">
                 <img 
-                  src={getAvatarImage()!} 
+                  src={getFullBodyImage()!} 
                   alt={config.name}
-                  className="w-full h-full object-cover"
+                  className="h-full w-auto object-contain object-bottom"
                 />
-              ) : (
-                <span className="text-4xl">{getAvatarIcon()}</span>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                {getAvatarImage() ? (
+                  <img 
+                    src={getAvatarImage()!} 
+                    alt={config.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-4xl">{getAvatarIcon()}</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 问候语 */}

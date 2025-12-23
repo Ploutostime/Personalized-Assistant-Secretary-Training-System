@@ -177,6 +177,7 @@ export interface SecretaryAvatar {
   type: SecretaryAvatarType;
   description: string | null;
   avatar_url: string | null;
+  full_body_url?: string | null; // 全身立绘图片URL
   voice_type: string | null;
   created_at: string;
 }

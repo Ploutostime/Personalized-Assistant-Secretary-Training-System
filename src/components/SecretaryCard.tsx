@@ -96,6 +96,15 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
     return null;
   };
 
+  // 获取全身立绘图片
+  const getFullBodyImage = () => {
+    if (type === 'avatar') {
+      const avatar = item as SecretaryAvatar;
+      return avatar.full_body_url || null;
+    }
+    return null;
+  };
+
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -106,7 +115,20 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           {/* 形象预览图 */}
-          {type === 'avatar' && getAvatarImage() && (
+          {type === 'avatar' && getFullBodyImage() && (
+            <div className="flex-shrink-0">
+              <div className="w-20 h-28 flex items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-primary/5 to-secondary/10">
+                <img 
+                  src={getFullBodyImage()!} 
+                  alt={item.name}
+                  className="h-full w-auto object-contain object-bottom"
+                />
+              </div>
+            </div>
+          )}
+          
+          {/* 如果没有全身图，显示头像 */}
+          {type === 'avatar' && !getFullBodyImage() && getAvatarImage() && (
             <div className="flex-shrink-0">
               <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20">
                 <img 
