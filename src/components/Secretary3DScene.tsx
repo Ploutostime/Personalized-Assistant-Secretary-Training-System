@@ -173,7 +173,7 @@ export default function Secretary3DScene({
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
         <pointLight position={[-5, 5, -5]} intensity={0.8} />
-        <hemisphereLight args={[0xffffff, 0x60a5fa, 0.5]} />
+        <hemisphereLight args={['#ffffff', '#60a5fa', 0.5]} />
         <Character3D avatarType={avatarType} isTalking={isTalking} />
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
           <planeGeometry args={[10, 10]} />
