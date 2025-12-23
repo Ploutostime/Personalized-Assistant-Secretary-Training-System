@@ -152,6 +152,63 @@ export interface UserPreferences {
   preferred_duration_max: number | null;
   auto_recommend: boolean;
   daily_recommendation_count: number;
+  secretary_avatar_id: string | null;
+  secretary_personality_id: string | null;
+  secretary_outfit_id: string | null;
+  secretary_name: string | null;
+  secretary_enabled: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// 秘书形象类型
+export type SecretaryAvatarType = 'loli' | 'oneesan' | 'uncle' | 'boss' | 'senior_sister' | 'senior_brother';
+
+// 秘书性格类型
+export type SecretaryPersonalityType = 'gentle' | 'strict' | 'lively' | 'calm' | 'motivating';
+
+// 秘书服装类型
+export type SecretaryOutfitType = 'campus' | 'business' | 'casual' | 'formal' | 'special';
+
+// 秘书形象接口
+export interface SecretaryAvatar {
+  id: string;
+  name: string;
+  type: SecretaryAvatarType;
+  description: string | null;
+  avatar_url: string | null;
+  voice_type: string | null;
+  created_at: string;
+}
+
+// 秘书性格接口
+export interface SecretaryPersonality {
+  id: string;
+  name: string;
+  type: SecretaryPersonalityType;
+  description: string | null;
+  greeting_template: string | null;
+  reminder_template: string | null;
+  encouragement_template: string | null;
+  created_at: string;
+}
+
+// 秘书服装接口
+export interface SecretaryOutfit {
+  id: string;
+  name: string;
+  type: SecretaryOutfitType;
+  description: string | null;
+  outfit_url: string | null;
+  suitable_avatars: string[] | null;
+  created_at: string;
+}
+
+// 秘书配置接口（用于前端展示）
+export interface SecretaryConfig {
+  avatar: SecretaryAvatar | null;
+  personality: SecretaryPersonality | null;
+  outfit: SecretaryOutfit | null;
+  name: string;
+  enabled: boolean;
 }

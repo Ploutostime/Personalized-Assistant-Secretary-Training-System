@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -14,10 +15,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getScheduleSettings, updateScheduleSettings, getProfile, updateProfile, getMajorTags, getUserPreferences, updateUserPreferences } from '@/db/api';
-import type { ScheduleSettings, MajorTag, UserPreferences } from '@/types/types';
-import { Settings as SettingsIcon, Clock, Save, User, Video, GraduationCap } from 'lucide-react';
+import { 
+  getScheduleSettings, 
+  updateScheduleSettings, 
+  getProfile, 
+  updateProfile, 
+  getMajorTags, 
+  getUserPreferences, 
+  updateUserPreferences,
+  getSecretaryAvatars,
+  getSecretaryPersonalities,
+  getSecretaryOutfits,
+  getUserSecretaryConfig,
+  updateSecretaryConfig,
+} from '@/db/api';
+import type { ScheduleSettings, MajorTag, UserPreferences, SecretaryAvatar, SecretaryPersonality, SecretaryOutfit, SecretaryConfig } from '@/types/types';
+import { Settings as SettingsIcon, Clock, Save, User, Video, GraduationCap, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { SecretaryCard } from '@/components/SecretaryCard';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -25,6 +40,17 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<ScheduleSettings | null>(null);
   const [majorTags, setMajorTags] = useState<MajorTag[]>([]);
+
+  // 秘书定制相关状态
+  const [avatars, setAvatars] = useState<SecretaryAvatar[]>([]);
+  const [personalities, setPersonalities] = useState<SecretaryPersonality[]>([]);
+  const [outfits, setOutfits] = useState<SecretaryOutfit[]>([]);
+  const [secretaryConfig, setSecretaryConfig] = useState<SecretaryConfig | null>(null);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string>('');
+  const [selectedPersonalityId, setSelectedPersonalityId] = useState<string>('');
+  const [selectedOutfitId, setSelectedOutfitId] = useState<string>('');
+  const [secretaryName, setSecretaryName] = useState('小秘');
+  const [secretaryEnabled, setSecretaryEnabled] = useState(true);
 
   const [formData, setFormData] = useState({
     daily_study_goal_hours: '8',
@@ -55,11 +81,15 @@ export default function SettingsPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [scheduleData, profileInfo, tags, preferences] = await Promise.all([
+      const [scheduleData, profileInfo, tags, preferences, avatarList, personalityList, outfitList, config] = await Promise.all([
         getScheduleSettings(user.id),
         getProfile(user.id),
         getMajorTags(),
         getUserPreferences(user.id),
+        getSecretaryAvatars(),
+        getSecretaryPersonalities(),
+        getSecretaryOutfits(),
+        getUserSecretaryConfig(user.id),
       ]);
 
       if (scheduleData) {
@@ -89,6 +119,20 @@ export default function SettingsPage() {
           preferred_duration_min: preferences.preferred_duration_min,
           preferred_duration_max: preferences.preferred_duration_max,
         });
+      }
+
+      // 设置秘书数据
+      setAvatars(avatarList);
+      setPersonalities(personalityList);
+      setOutfits(outfitList);
+      
+      if (config) {
+        setSecretaryConfig(config);
+        setSelectedAvatarId(config.avatar?.id || '');
+        setSelectedPersonalityId(config.personality?.id || '');
+        setSelectedOutfitId(config.outfit?.id || '');
+        setSecretaryName(config.name);
+        setSecretaryEnabled(config.enabled);
       }
     } catch (error) {
       console.error('加载设置失败:', error);
@@ -173,6 +217,29 @@ export default function SettingsPage() {
       loadSettings();
     } else {
       toast.error('视频偏好保存失败');
+    }
+  };
+
+  const handleSecretaryConfigSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setSaving(true);
+    const success = await updateSecretaryConfig(user.id, {
+      avatarId: selectedAvatarId,
+      personalityId: selectedPersonalityId,
+      outfitId: selectedOutfitId,
+      name: secretaryName,
+      enabled: secretaryEnabled,
+    });
+
+    setSaving(false);
+
+    if (success) {
+      toast.success('秘书形象保存成功');
+      loadSettings();
+    } else {
+      toast.error('秘书形象保存失败');
     }
   };
 
@@ -411,6 +478,108 @@ export default function SettingsPage() {
               <Button type="submit" disabled={saving}>
                 <Save className="mr-2 h-4 w-4" />
                 {saving ? '保存中...' : '保存偏好'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* 秘书形象定制 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            专属学习秘书
+          </CardTitle>
+          <CardDescription>定制你的专属学习秘书形象、性格和服装</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSecretaryConfigSubmit} className="space-y-6">
+            {/* 启用开关 */}
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+              <div className="space-y-0.5">
+                <Label>启用学习秘书</Label>
+                <p className="text-sm text-muted-foreground">
+                  开启后，秘书将在仪表盘为你提供问候和提醒
+                </p>
+              </div>
+              <Switch
+                checked={secretaryEnabled}
+                onCheckedChange={setSecretaryEnabled}
+              />
+            </div>
+
+            {/* 秘书名称 */}
+            <div className="space-y-2">
+              <Label htmlFor="secretary_name">秘书名称</Label>
+              <Input
+                id="secretary_name"
+                value={secretaryName}
+                onChange={(e) => setSecretaryName(e.target.value)}
+                placeholder="给你的秘书起个名字"
+              />
+            </div>
+
+            <Separator />
+
+            {/* 选择形象 */}
+            <div className="space-y-3">
+              <Label>选择形象</Label>
+              <Tabs defaultValue="avatar" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="avatar">形象</TabsTrigger>
+                  <TabsTrigger value="personality">性格</TabsTrigger>
+                  <TabsTrigger value="outfit">服装</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="avatar" className="space-y-3 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {avatars.map((avatar) => (
+                      <SecretaryCard
+                        key={avatar.id}
+                        item={avatar}
+                        type="avatar"
+                        selected={selectedAvatarId === avatar.id}
+                        onClick={() => setSelectedAvatarId(avatar.id)}
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="personality" className="space-y-3 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {personalities.map((personality) => (
+                      <SecretaryCard
+                        key={personality.id}
+                        item={personality}
+                        type="personality"
+                        selected={selectedPersonalityId === personality.id}
+                        onClick={() => setSelectedPersonalityId(personality.id)}
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="outfit" className="space-y-3 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {outfits.map((outfit) => (
+                      <SecretaryCard
+                        key={outfit.id}
+                        item={outfit}
+                        type="outfit"
+                        selected={selectedOutfitId === outfit.id}
+                        onClick={() => setSelectedOutfitId(outfit.id)}
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving}>
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? '保存中...' : '保存配置'}
               </Button>
             </div>
           </form>

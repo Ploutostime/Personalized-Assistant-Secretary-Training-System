@@ -10,6 +10,7 @@ import type { Task, KnowledgeItem, VideoRecommendation } from '@/types/types';
 import { Clock, ListTodo, BookMarked, TrendingUp, AlertCircle, CheckCircle2, Calendar, Video, Play, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { SecretaryAssistant } from '@/components/SecretaryAssistant';
 
 const priorityColors = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -106,6 +107,9 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-primary">仪表盘</h1>
         <p className="text-muted-foreground mt-1">欢迎回来，开始高效学习吧！</p>
       </div>
+
+      {/* 秘书助手 */}
+      <SecretaryAssistant />
 
       {/* 统计卡片 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -12,6 +12,10 @@ import type {
   VideoRecommendation,
   VideoWatchHistory,
   UserPreferences,
+  SecretaryAvatar,
+  SecretaryPersonality,
+  SecretaryOutfit,
+  SecretaryConfig,
 } from '@/types/types';
 
 // ==================== Profiles ====================
@@ -614,4 +618,174 @@ export async function updateUserPreferences(
     return false;
   }
   return true;
+}
+
+// ==================== Secretary Customization ====================
+
+// 获取所有秘书形象
+export async function getSecretaryAvatars(): Promise<SecretaryAvatar[]> {
+  const { data, error } = await supabase
+    .from('secretary_avatars')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('获取秘书形象失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// 获取所有秘书性格
+export async function getSecretaryPersonalities(): Promise<SecretaryPersonality[]> {
+  const { data, error } = await supabase
+    .from('secretary_personalities')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('获取秘书性格失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// 获取所有秘书服装
+export async function getSecretaryOutfits(): Promise<SecretaryOutfit[]> {
+  const { data, error } = await supabase
+    .from('secretary_outfits')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('获取秘书服装失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// 获取用户的秘书配置
+export async function getUserSecretaryConfig(userId: string): Promise<SecretaryConfig | null> {
+  // 获取用户偏好
+  const preferences = await getUserPreferences(userId);
+  if (!preferences) {
+    return null;
+  }
+
+  // 获取秘书形象
+  let avatar: SecretaryAvatar | null = null;
+  if (preferences.secretary_avatar_id) {
+    const { data } = await supabase
+      .from('secretary_avatars')
+      .select('*')
+      .eq('id', preferences.secretary_avatar_id)
+      .maybeSingle();
+    avatar = data;
+  }
+
+  // 获取秘书性格
+  let personality: SecretaryPersonality | null = null;
+  if (preferences.secretary_personality_id) {
+    const { data } = await supabase
+      .from('secretary_personalities')
+      .select('*')
+      .eq('id', preferences.secretary_personality_id)
+      .maybeSingle();
+    personality = data;
+  }
+
+  // 获取秘书服装
+  let outfit: SecretaryOutfit | null = null;
+  if (preferences.secretary_outfit_id) {
+    const { data } = await supabase
+      .from('secretary_outfits')
+      .select('*')
+      .eq('id', preferences.secretary_outfit_id)
+      .maybeSingle();
+    outfit = data;
+  }
+
+  return {
+    avatar,
+    personality,
+    outfit,
+    name: preferences.secretary_name || '小秘',
+    enabled: preferences.secretary_enabled,
+  };
+}
+
+// 更新用户的秘书配置
+export async function updateSecretaryConfig(
+  userId: string,
+  config: {
+    avatarId?: string;
+    personalityId?: string;
+    outfitId?: string;
+    name?: string;
+    enabled?: boolean;
+  }
+): Promise<boolean> {
+  const updates: Partial<UserPreferences> = {};
+
+  if (config.avatarId !== undefined) {
+    updates.secretary_avatar_id = config.avatarId || null;
+  }
+  if (config.personalityId !== undefined) {
+    updates.secretary_personality_id = config.personalityId || null;
+  }
+  if (config.outfitId !== undefined) {
+    updates.secretary_outfit_id = config.outfitId || null;
+  }
+  if (config.name !== undefined) {
+    updates.secretary_name = config.name;
+  }
+  if (config.enabled !== undefined) {
+    updates.secretary_enabled = config.enabled;
+  }
+
+  return updateUserPreferences(userId, updates);
+}
+
+// 生成秘书问候语
+export function generateSecretaryGreeting(
+  personality: SecretaryPersonality | null,
+  secretaryName: string,
+  userName?: string
+): string {
+  if (!personality || !personality.greeting_template) {
+    return `早上好！${secretaryName}在这里陪伴你学习~`;
+  }
+
+  return personality.greeting_template
+    .replace('{name}', secretaryName)
+    .replace('{user}', userName || '同学');
+}
+
+// 生成秘书提醒语
+export function generateSecretaryReminder(
+  personality: SecretaryPersonality | null,
+  secretaryName: string,
+  taskTitle: string,
+  timeLeft?: string
+): string {
+  if (!personality || !personality.reminder_template) {
+    return `提醒：${taskTitle}需要完成啦！`;
+  }
+
+  return personality.reminder_template
+    .replace('{name}', secretaryName)
+    .replace('{task}', taskTitle)
+    .replace('{time}', timeLeft || '不多');
+}
+
+// 生成秘书鼓励语
+export function generateSecretaryEncouragement(
+  personality: SecretaryPersonality | null,
+  secretaryName: string
+): string {
+  if (!personality || !personality.encouragement_template) {
+    return `太棒了！继续加油！${secretaryName}相信你！`;
+  }
+
+  return personality.encouragement_template.replace('{name}', secretaryName);
 }
