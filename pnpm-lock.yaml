@@ -7,7 +7,7 @@ settings:
 catalogs:
   default:
     '@react-three/drei':
-      specifier: 9.122.0
+      specifier: 'catalog:'
       version: 9.122.0
 
 importers:

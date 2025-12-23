@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
@@ -7,7 +6,6 @@ import * as THREE from 'three';
 // 3D角色组件
 function Character3D({ avatarType, istalking }: { avatarType: string; istalking: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [hue, setHue] = useState(0);
 
   // 根据形象类型设置颜色
   const getColor = () => {
@@ -112,7 +110,7 @@ export default function Secretary3DScene({
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
         <pointLight position={[-5, 5, -5]} intensity={0.8} />
-        <hemisphereLight skyColor="#ffffff" groundColor="#60a5fa" intensity={0.5} />
+        <hemisphereLight args={[0xffffff, 0x60a5fa, 0.5]} />
         
         <Character3D avatarType={avatarType} istalking={isTalking} />
         
