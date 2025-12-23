@@ -262,3 +262,94 @@ export interface SecretaryConfig {
   personality_id?: string;
   outfit_id?: string;
 }
+
+// 情绪类型
+export type EmotionType = 
+  | 'happy'      // 开心
+  | 'sad'        // 悲伤
+  | 'excited'    // 兴奋
+  | 'calm'       // 平静
+  | 'worried'    // 担心
+  | 'proud'      // 骄傲
+  | 'neutral'    // 中性
+  | 'caring'     // 关怀
+  | 'playful';   // 调皮
+
+// 情绪状态接口
+export interface EmotionalState {
+  id: string;
+  user_id: string;
+  secretary_type: string;
+  current_emotion: EmotionType;
+  emotion_intensity: number; // 0-100
+  context: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 记忆类型
+export type MemoryType = 
+  | 'preference'    // 偏好
+  | 'habit'         // 习惯
+  | 'goal'          // 目标
+  | 'achievement'   // 成就
+  | 'conversation'  // 对话
+  | 'emotion';      // 情感
+
+// 记忆接口
+export interface Memory {
+  id: string;
+  user_id: string;
+  secretary_type: string;
+  memory_type: MemoryType;
+  memory_key: string;
+  memory_value: string;
+  importance: number; // 0-100
+  last_accessed: string;
+  created_at: string;
+}
+
+// 语言风格接口
+export interface LanguageStyle {
+  formality: number;   // 正式度 0-100
+  intimacy: number;    // 亲密度 0-100
+  elegance: number;    // 文雅度 0-100
+}
+
+// 情感表达接口
+export interface EmotionalExpression {
+  richness: number;    // 情感丰富度 0-100
+  empathy: number;     // 共情能力 0-100
+}
+
+// 交流方式接口
+export interface CommunicationStyle {
+  proactivity: number; // 主动性 0-100
+  guidance: number;    // 引导性 0-100
+  listening: number;   // 倾听性 0-100
+}
+
+// 声音特征接口
+export interface VoiceCharacteristics {
+  pitch: string;        // 音调: low/medium/high
+  speed: string;        // 语速: slow/normal/fast
+  emotion_color: string; // 情感色彩: warm/cool/neutral
+}
+
+// 扩展的秘书性格接口
+export interface ExtendedSecretaryPersonality extends SecretaryPersonality {
+  language_style?: LanguageStyle | null;
+  emotional_expression?: EmotionalExpression | null;
+  communication_style?: CommunicationStyle | null;
+  voice_characteristics?: VoiceCharacteristics | null;
+  catchphrases?: string[] | null;
+  emotion_reactions?: Record<string, string> | null;
+}
+
+// 扩展的秘书形象接口
+export interface ExtendedSecretaryAvatar extends SecretaryAvatar {
+  personality_description?: string | null;
+  speaking_style?: string | null;
+  emotional_traits?: Record<string, number> | null;
+  interaction_preferences?: Record<string, any> | null;
+}

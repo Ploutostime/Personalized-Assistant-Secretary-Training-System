@@ -822,3 +822,250 @@ export function generateSecretaryEncouragement(
 
   return personality.encouragement_template.replace('{name}', secretaryName);
 }
+
+// ==================== 情绪状态管理 ====================
+
+// 获取用户的秘书情绪状态
+export async function getEmotionalState(userId: string, secretaryType: string) {
+  const { data, error } = await supabase
+    .from('secretary_emotional_states')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('secretary_type', secretaryType)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('获取情绪状态失败:', error);
+    return null;
+  }
+  return data;
+}
+
+// 更新秘书情绪状态
+export async function updateEmotionalState(
+  userId: string,
+  secretaryType: string,
+  emotion: string,
+  intensity: number,
+  context?: string
+) {
+  const { data, error } = await supabase
+    .from('secretary_emotional_states')
+    .insert({
+      user_id: userId,
+      secretary_type: secretaryType,
+      current_emotion: emotion,
+      emotion_intensity: intensity,
+      context: context || null,
+    })
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('更新情绪状态失败:', error);
+    return null;
+  }
+  return data;
+}
+
+// ==================== 记忆系统管理 ====================
+
+// 获取秘书记忆
+export async function getSecretaryMemories(
+  userId: string,
+  secretaryType: string,
+  memoryType?: string
+) {
+  let query = supabase
+    .from('secretary_memory')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('secretary_type', secretaryType);
+
+  if (memoryType) {
+    query = query.eq('memory_type', memoryType);
+  }
+
+  const { data, error } = await query
+    .order('importance', { ascending: false })
+    .order('last_accessed', { ascending: false });
+
+  if (error) {
+    console.error('获取记忆失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// 添加秘书记忆
+export async function addSecretaryMemory(
+  userId: string,
+  secretaryType: string,
+  memoryType: string,
+  memoryKey: string,
+  memoryValue: string,
+  importance: number = 50
+) {
+  const { data, error } = await supabase
+    .from('secretary_memory')
+    .insert({
+      user_id: userId,
+      secretary_type: secretaryType,
+      memory_type: memoryType,
+      memory_key: memoryKey,
+      memory_value: memoryValue,
+      importance: importance,
+    })
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('添加记忆失败:', error);
+    return null;
+  }
+  return data;
+}
+
+// 更新秘书记忆
+export async function updateSecretaryMemory(
+  memoryId: string,
+  updates: {
+    memory_value?: string;
+    importance?: number;
+  }
+) {
+  const { data, error } = await supabase
+    .from('secretary_memory')
+    .update(updates)
+    .eq('id', memoryId)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('更新记忆失败:', error);
+    return null;
+  }
+  return data;
+}
+
+// 删除秘书记忆
+export async function deleteSecretaryMemory(memoryId: string) {
+  const { error } = await supabase
+    .from('secretary_memory')
+    .delete()
+    .eq('id', memoryId);
+
+  if (error) {
+    console.error('删除记忆失败:', error);
+    return false;
+  }
+  return true;
+}
+
+// 搜索秘书记忆
+export async function searchSecretaryMemory(
+  userId: string,
+  secretaryType: string,
+  keyword: string
+) {
+  const { data, error } = await supabase
+    .from('secretary_memory')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('secretary_type', secretaryType)
+    .or(`memory_key.ilike.%${keyword}%,memory_value.ilike.%${keyword}%`)
+    .order('importance', { ascending: false });
+
+  if (error) {
+    console.error('搜索记忆失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// ==================== 管理员功能 ====================
+
+// 检查用户是否为管理员
+export async function isAdmin(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('检查管理员权限失败:', error);
+    return false;
+  }
+  return data?.role === 'admin';
+}
+
+// 获取所有用户（管理员功能）
+export async function getAllUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, email, role, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('获取用户列表失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+// 更新用户角色（管理员功能）
+export async function updateUserRole(userId: string, role: 'user' | 'admin') {
+  const { error } = await supabase
+    .from('users')
+    .update({ role })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('更新用户角色失败:', error);
+    return false;
+  }
+  return true;
+}
+
+// 获取系统统计数据（管理员功能）
+export async function getSystemStats() {
+  try {
+    // 获取用户总数
+    const { count: userCount } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+
+    // 获取任务总数
+    const { count: taskCount } = await supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true });
+
+    // 获取学习会话总数
+    const { count: sessionCount } = await supabase
+      .from('study_sessions')
+      .select('*', { count: 'exact', head: true });
+
+    // 获取知识点总数
+    const { count: knowledgeCount } = await supabase
+      .from('knowledge_items')
+      .select('*', { count: 'exact', head: true });
+
+    return {
+      userCount: userCount || 0,
+      taskCount: taskCount || 0,
+      sessionCount: sessionCount || 0,
+      knowledgeCount: knowledgeCount || 0,
+    };
+  } catch (error) {
+    console.error('获取系统统计失败:', error);
+    return {
+      userCount: 0,
+      taskCount: 0,
+      sessionCount: 0,
+      knowledgeCount: 0,
+    };
+  }
+}
