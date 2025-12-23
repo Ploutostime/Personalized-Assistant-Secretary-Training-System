@@ -297,6 +297,15 @@ export interface SecretaryOutfit {
   created_at: string;
 }
 
+// 秘书服装立绘接口（秘书穿着特定服装的立绘）
+export interface SecretaryOutfitImage {
+  id: string;
+  secretary_avatar_id: string;
+  outfit_id: string;
+  image_url: string;
+  created_at: string;
+}
+
 // 秘书配置接口（用于前端展示）
 export interface SecretaryConfig {
   avatar: SecretaryAvatar | null;
@@ -307,6 +316,7 @@ export interface SecretaryConfig {
   avatar_id?: string;
   personality_id?: string;
   outfit_id?: string;
+  current_outfit_image_url?: string | null; // 当前服装的立绘URL
 }
 
 // 情绪类型
