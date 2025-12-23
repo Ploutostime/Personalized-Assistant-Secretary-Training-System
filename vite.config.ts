@@ -7,17 +7,9 @@ import { miaodaDevPlugin } from "miaoda-sc-plugin";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(), 
-    svgr({
+  plugins: [react(), svgr({
       svgrOptions: {
-        icon: true, 
-        exportType: 'named', 
-        namedExport: 'ReactComponent', 
-      }, 
-    }), 
-    miaodaDevPlugin()
-  ],
+        icon: true, exportType: 'named', namedExport: 'ReactComponent', }, }), miaodaDevPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -73,7 +65,5 @@ export default defineConfig({
       'lucide-react',
       'date-fns',
     ],
-    // 排除 3D 库，按需加载
-    exclude: ['three', '@react-three/fiber', '@react-three/drei'],
   },
 });
