@@ -92,7 +92,6 @@ function Character3D({ avatarType, isTalking }: { avatarType: string; isTalking:
 
   return (
     <group>
-      {/* 身体 */}
       <mesh ref={meshRef} position={[0, 0, 0]}>
         <capsuleGeometry args={[0.3, 1, 16, 32]} />
         <meshStandardMaterial 
@@ -102,7 +101,6 @@ function Character3D({ avatarType, isTalking }: { avatarType: string; isTalking:
         />
       </mesh>
       
-      {/* 头部 */}
       <mesh ref={headRef} position={[0, 1, 0]}>
         <sphereGeometry args={[0.35, 32, 32]} />
         <meshStandardMaterial 
@@ -112,19 +110,16 @@ function Character3D({ avatarType, isTalking }: { avatarType: string; isTalking:
         />
       </mesh>
       
-      {/* 左眼 */}
       <mesh position={[-0.12, 1.1, 0.3]}>
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       
-      {/* 右眼 */}
       <mesh position={[0.12, 1.1, 0.3]}>
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       
-      {/* 嘴巴 - 说话时显示 */}
       {isTalking ? (
         <mesh position={[0, 0.9, 0.32]}>
           <sphereGeometry args={[0.08, 16, 16]} />
@@ -132,25 +127,21 @@ function Character3D({ avatarType, isTalking }: { avatarType: string; isTalking:
         </mesh>
       ) : null}
       
-      {/* 左臂 */}
       <mesh position={[-0.4, 0.3, 0]} rotation={[0, 0, 0.3]}>
         <capsuleGeometry args={[0.08, 0.6, 8, 16]} />
         <meshStandardMaterial color={style.accent} />
       </mesh>
       
-      {/* 右臂 */}
       <mesh position={[0.4, 0.3, 0]} rotation={[0, 0, -0.3]}>
         <capsuleGeometry args={[0.08, 0.6, 8, 16]} />
         <meshStandardMaterial color={style.accent} />
       </mesh>
       
-      {/* 左腿 */}
       <mesh position={[-0.15, -0.8, 0]}>
         <capsuleGeometry args={[0.1, 0.8, 8, 16]} />
         <meshStandardMaterial color={style.accent} />
       </mesh>
       
-      {/* 右腿 */}
       <mesh position={[0.15, -0.8, 0]}>
         <capsuleGeometry args={[0.1, 0.8, 8, 16]} />
         <meshStandardMaterial color={style.accent} />
