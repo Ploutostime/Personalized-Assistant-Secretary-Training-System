@@ -258,4 +258,7 @@ export interface SecretaryConfig {
   outfit: SecretaryOutfit | null;
   name: string;
   enabled: boolean;
+  avatar_id?: string;
+  personality_id?: string;
+  outfit_id?: string;
 }

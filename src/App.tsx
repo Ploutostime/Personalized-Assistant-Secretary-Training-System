@@ -19,8 +19,8 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const VideoTerminalPage = lazy(() => import('./pages/VideoTerminalPage'));
 
-// 延迟加载浮窗秘书（包含3D组件）
-const FloatingSecretary = lazy(() => import('./components/FloatingSecretary').then(module => ({ default: module.FloatingSecretary })));
+// 延迟加载2D浮窗秘书
+const SecretaryFloatingWidget = lazy(() => import('./components/SecretaryFloatingWidget').then(module => ({ default: module.SecretaryFloatingWidget })));
 
 const App: React.FC = () => {
   return (
@@ -46,7 +46,7 @@ const App: React.FC = () => {
         </RouteGuard>
         <Toaster />
         <Suspense fallback={null}>
-          <FloatingSecretary />
+          <SecretaryFloatingWidget />
         </Suspense>
       </AuthProvider>
     </Router>

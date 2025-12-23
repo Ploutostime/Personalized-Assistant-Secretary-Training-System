@@ -636,6 +636,21 @@ export async function getSecretaryAvatars(): Promise<SecretaryAvatar[]> {
   return Array.isArray(data) ? data : [];
 }
 
+// 获取单个秘书形象
+export async function getSecretaryAvatarById(id: string): Promise<SecretaryAvatar | null> {
+  const { data, error } = await supabase
+    .from('secretary_avatars')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('获取秘书形象失败:', error);
+    return null;
+  }
+  return data;
+}
+
 // 获取所有秘书性格
 export async function getSecretaryPersonalities(): Promise<SecretaryPersonality[]> {
   const { data, error } = await supabase
@@ -711,6 +726,9 @@ export async function getUserSecretaryConfig(userId: string): Promise<SecretaryC
     outfit,
     name: preferences.secretary_name || '小秘',
     enabled: preferences.secretary_enabled,
+    avatar_id: preferences.secretary_avatar_id || undefined,
+    personality_id: preferences.secretary_personality_id || undefined,
+    outfit_id: preferences.secretary_outfit_id || undefined,
   };
 }
 
