@@ -91,6 +91,12 @@ export function SecretaryAssistant() {
     return iconMap[config.avatar.type] || '👤';
   };
 
+  // 获取形象图片
+  const getAvatarImage = () => {
+    if (!config.avatar || !config.avatar.avatar_url) return null;
+    return config.avatar.avatar_url;
+  };
+
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-secondary/5">
       <CardHeader>
@@ -112,8 +118,16 @@ export function SecretaryAssistant() {
         <div className="flex items-start gap-4">
           {/* 秘书形象 */}
           <div className="flex-shrink-0">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-4xl">
-              {getAvatarIcon()}
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
+              {getAvatarImage() ? (
+                <img 
+                  src={getAvatarImage()!} 
+                  alt={config.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl">{getAvatarIcon()}</span>
+              )}
             </div>
           </div>
 

@@ -87,6 +87,15 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
     return outfitTypeIcon[(item as SecretaryOutfit).type] || '👔';
   };
 
+  // 获取形象图片
+  const getAvatarImage = () => {
+    if (type === 'avatar') {
+      const avatar = item as SecretaryAvatar;
+      return avatar.avatar_url || null;
+    }
+    return null;
+  };
+
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -95,10 +104,26 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
       onClick={onClick}
     >
       <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
+          {/* 形象预览图 */}
+          {type === 'avatar' && getAvatarImage() && (
+            <div className="flex-shrink-0">
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20">
+                <img 
+                  src={getAvatarImage()!} 
+                  alt={item.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
+          
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">{getTypeIcon()}</span>
+              {/* 如果没有图片或不是形象类型，显示图标 */}
+              {(type !== 'avatar' || !getAvatarImage()) && (
+                <span className="text-2xl">{getTypeIcon()}</span>
+              )}
               <div>
                 <h3 className="font-semibold">{item.name}</h3>
                 <Badge variant="secondary" className="text-xs">
@@ -110,6 +135,7 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
               <p className="text-sm text-muted-foreground mt-2">{item.description}</p>
             )}
           </div>
+          
           {selected && (
             <div className="ml-2 flex-shrink-0">
               <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">

@@ -191,6 +191,12 @@ export function FloatingSecretary() {
     return iconMap[config.avatar.type] || '👤';
   };
 
+  // 获取形象图片
+  const getAvatarImage = () => {
+    if (!config?.avatar || !config.avatar.avatar_url) return null;
+    return config.avatar.avatar_url;
+  };
+
   // 如果未启用或不可见，不渲染
   if (!config || !config.enabled || !isVisible || !user) {
     return null;
@@ -213,8 +219,16 @@ export function FloatingSecretary() {
           onClick={() => setIsMinimized(false)}
         >
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-2xl">
-              {getAvatarIcon()}
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/30">
+              {getAvatarImage() ? (
+                <img 
+                  src={getAvatarImage()!} 
+                  alt={config.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl">{getAvatarIcon()}</span>
+              )}
             </div>
             <MessageCircle className="w-4 h-4 text-primary animate-pulse" />
           </div>
@@ -228,8 +242,16 @@ export function FloatingSecretary() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xl">
-                  {getAvatarIcon()}
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/30">
+                  {getAvatarImage() ? (
+                    <img 
+                      src={getAvatarImage()!} 
+                      alt={config.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xl">{getAvatarIcon()}</span>
+                  )}
                 </div>
                 <span className="font-semibold text-sm">{config.name}</span>
               </div>
