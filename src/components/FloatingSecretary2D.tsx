@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, MessageCircle, Minimize2, Maximize2, Settings } from 'lucide-react';
+import { X, MessageCircle, Minimize2, Maximize2, Volume2, VolumeX, Heart, Coffee, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import SecretaryChat from './SecretaryChat';
+import {
+  voiceManager,
+  getSecretaryVoiceConfig,
+  getRandomPhrase,
+} from '@/utils/voiceManager';
 import type { SecretaryAvatar } from '@/types/types';
 
 interface FloatingSecretary2DProps {
@@ -19,7 +24,11 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
   const [showChat, setShowChat] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const [animation, setAnimation] = useState<'idle' | 'talking' | 'thinking'>('idle');
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [dialogText, setDialogText] = useState('');
+  const [showDialog, setShowDialog] = useState(false);
   const floatingRef = useRef<HTMLDivElement>(null);
+  const dialogTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 从 localStorage 加载位置
   useEffect(() => {
@@ -90,6 +99,79 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
 
     return () => clearInterval(interval);
   }, [isTalking]);
+
+  // 显示对话气泡
+  const showDialogMessage = (text: string, duration = 3000) => {
+    setDialogText(text);
+    setShowDialog(true);
+    setAnimation('talking');
+
+    // 清除之前的定时器
+    if (dialogTimerRef.current) {
+      clearTimeout(dialogTimerRef.current);
+    }
+
+    // 设置新的定时器
+    dialogTimerRef.current = setTimeout(() => {
+      setShowDialog(false);
+      setAnimation('idle');
+    }, duration);
+  };
+
+  // 播放语音并显示对话
+  const speakWithDialog = (type: 'greeting' | 'comment' | 'encouragement' | 'reminder') => {
+    const config = getSecretaryVoiceConfig(secretary.type);
+    let phrase = '';
+
+    switch (type) {
+      case 'greeting':
+        phrase = getRandomPhrase(config.greetings);
+        break;
+      case 'comment':
+        phrase = getRandomPhrase(config.comments);
+        break;
+      case 'encouragement':
+        phrase = getRandomPhrase(config.encouragements);
+        break;
+      case 'reminder':
+        phrase = getRandomPhrase(config.reminders);
+        break;
+    }
+
+    showDialogMessage(phrase);
+
+    if (voiceEnabled) {
+      voiceManager.speak(phrase, {
+        pitch: config.pitch,
+        rate: config.rate,
+        volume: config.volume,
+      });
+    }
+  };
+
+  // 点击秘书互动
+  const handleSecretaryClick = () => {
+    if (isMinimized) return;
+    speakWithDialog('greeting');
+  };
+
+  // 鼓励互动
+  const handleEncourage = () => {
+    speakWithDialog('encouragement');
+  };
+
+  // 提醒学习
+  const handleRemind = () => {
+    speakWithDialog('reminder');
+  };
+
+  // 切换语音
+  const toggleVoice = () => {
+    setVoiceEnabled(!voiceEnabled);
+    if (!voiceEnabled) {
+      voiceManager.stop();
+    }
+  };
 
   // 获取动画类名
   const getAnimationClass = () => {
@@ -163,6 +245,19 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
               variant="ghost"
               size="icon"
               className="h-6 w-6 bg-background/80 hover:bg-background"
+              onClick={toggleVoice}
+              title={voiceEnabled ? '关闭语音' : '开启语音'}
+            >
+              {voiceEnabled ? (
+                <Volume2 className="w-3 h-3" />
+              ) : (
+                <VolumeX className="w-3 h-3" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 bg-background/80 hover:bg-background"
               onClick={() => setShowChat(!showChat)}
               title="对话"
             >
@@ -191,7 +286,10 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
           </div>
 
           {/* 秘书形象 */}
-          <div className="relative w-48 h-64 flex items-end justify-center overflow-hidden">
+          <div 
+            className="relative w-48 h-64 flex items-end justify-center overflow-hidden cursor-pointer hover:bg-primary/5 transition-colors"
+            onClick={handleSecretaryClick}
+          >
             {/* 背景装饰 */}
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/10" />
             
@@ -205,16 +303,17 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
               }}
             />
 
-            {/* 说话气泡 */}
-            {isTalking && (
-              <div className="absolute top-4 left-4 right-4 bg-background/90 backdrop-blur rounded-lg p-2 shadow-lg animate-fade-in">
-                <p className="text-xs text-center">正在思考...</p>
+            {/* 对话气泡 */}
+            {showDialog && (
+              <div className="absolute top-4 left-2 right-2 bg-white dark:bg-gray-800 backdrop-blur rounded-lg p-2 shadow-lg animate-fade-in border border-primary/20">
+                <p className="text-xs text-foreground">{dialogText}</p>
+                <div className="absolute -bottom-2 left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white dark:border-t-gray-800" />
               </div>
             )}
           </div>
 
-          {/* 秘书信息 */}
-          <div className="p-3 border-t bg-background/50">
+          {/* 秘书信息和互动按钮 */}
+          <div className="p-3 border-t bg-background/50 space-y-2">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-sm">{secretary.name}</h3>
@@ -223,6 +322,30 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
               <div className="flex items-center gap-1">
                 <div className={`w-2 h-2 rounded-full ${animation === 'idle' ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`} />
               </div>
+            </div>
+            
+            {/* 互动按钮 */}
+            <div className="flex items-center gap-1 no-drag">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 flex-1 text-xs"
+                onClick={handleEncourage}
+                title="鼓励我"
+              >
+                <Heart className="w-3 h-3 mr-1" />
+                鼓励
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 flex-1 text-xs"
+                onClick={handleRemind}
+                title="提醒学习"
+              >
+                <BookOpen className="w-3 h-3 mr-1" />
+                提醒
+              </Button>
             </div>
           </div>
         </Card>

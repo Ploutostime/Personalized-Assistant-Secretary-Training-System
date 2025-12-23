@@ -159,9 +159,11 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
       console.error('保存秘书配置失败:', error);
       alert('保存失败，请重试');
     } else {
-      alert('保存成功！');
+      alert('保存成功！秘书已启用为桌面宠物');
       // 播放鼓励语
       playSecretaryVoice('encouragement');
+      // 刷新页面以显示桌面宠物
+      window.location.reload();
     }
   };
 
