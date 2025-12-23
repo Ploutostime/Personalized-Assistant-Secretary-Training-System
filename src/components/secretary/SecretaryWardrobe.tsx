@@ -5,8 +5,14 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecretaryDisplay } from './SecretaryDisplay';
+import { VoiceControl } from './VoiceControl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import {
+  voiceManager,
+  getSecretaryVoiceConfig,
+  getRandomPhrase,
+} from '@/utils/voiceManager';
 import type { SecretaryAvatar, SecretaryOutfit } from '@/types/types';
 
 interface SecretaryWardrobeProps {
@@ -24,6 +30,33 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
   const [availableOutfits, setAvailableOutfits] = useState<OutfitWithImage[]>([]);
   const [selectedOutfitId, setSelectedOutfitId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+
+  // 播放秘书语音
+  const playSecretaryVoice = (type: 'greeting' | 'comment' | 'encouragement') => {
+    if (!voiceEnabled || !selectedSecretary) return;
+
+    const config = getSecretaryVoiceConfig(selectedSecretary.type);
+    let phrase = '';
+
+    switch (type) {
+      case 'greeting':
+        phrase = getRandomPhrase(config.greetings);
+        break;
+      case 'comment':
+        phrase = getRandomPhrase(config.comments);
+        break;
+      case 'encouragement':
+        phrase = getRandomPhrase(config.encouragements);
+        break;
+    }
+
+    voiceManager.speak(phrase, {
+      pitch: config.pitch,
+      rate: config.rate,
+      volume: config.volume,
+    });
+  };
 
   // 加载所有秘书
   useEffect(() => {
@@ -48,6 +81,18 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
 
     loadSecretaries();
   }, []);
+
+  // 当选择秘书时播放问候语
+  useEffect(() => {
+    if (selectedSecretary) {
+      // 延迟播放，避免立即触发
+      const timer = setTimeout(() => {
+        playSecretaryVoice('greeting');
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedSecretary?.id]);
 
   // 加载选中秘书的可用服装
   useEffect(() => {
@@ -83,6 +128,18 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
     loadOutfits();
   }, [selectedSecretary]);
 
+  // 当切换服装时播放评论
+  useEffect(() => {
+    if (selectedOutfitId && availableOutfits.length > 0) {
+      // 延迟播放，避免初始加载时触发
+      const timer = setTimeout(() => {
+        playSecretaryVoice('comment');
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedOutfitId]);
+
   // 保存用户选择
   const handleSaveSelection = async () => {
     if (!selectedSecretary || !selectedOutfitId) return;
@@ -103,6 +160,8 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
       alert('保存失败，请重试');
     } else {
       alert('保存成功！');
+      // 播放鼓励语
+      playSecretaryVoice('encouragement');
     }
   };
 
@@ -127,7 +186,15 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>秘书换装系统</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>秘书换装系统</CardTitle>
+            {selectedSecretary && (
+              <VoiceControl
+                secretaryType={selectedSecretary.type}
+                showText={false}
+              />
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="select" className="w-full">
