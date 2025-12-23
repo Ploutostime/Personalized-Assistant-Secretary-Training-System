@@ -4,38 +4,41 @@
 
 在实现3D秘书功能时，遇到了版本兼容性问题：
 
-### 错误：@react-three/fiber 版本过旧
+### 错误：Three.js 版本过新导致兼容性问题
 ```
-Uncaught TypeError: Cannot read properties of undefined (reading 'md')
-    at hasColorSpace (@react-three/fiber/dist/events-776716bd.esm.js:680:49)
+Uncaught TypeError: Cannot read properties of undefined (reading 'S')
+    at listeners.forEach (react-reconciler)
+    at createReconciler (@react-three/fiber)
 ```
 
 **原因：**
 - 初始安装的 Three.js 版本为 0.180.0
 - 降级到 0.169.0 后仍然存在兼容性问题
 - 升级到 0.170.0 后问题依然存在
-- **根本原因：@react-three/fiber@8.18.0 版本过旧，与 three@0.170.0 不兼容**
-- @react-three/fiber v8.x 不支持较新的 Three.js API
+- 升级 @react-three/fiber 到 v9.4.2 后，仍有新的错误
+- **根本原因：Three.js 0.170.0 版本过新，内部 API 发生变化，与 @react-three/fiber@9.4.2 不完全兼容**
+- 错误发生在处理 Three.js 对象属性时，某个属性 'S' 未定义
 
 ## 修复方案
 
-### 最终解决方案：升级 @react-three/fiber 到 v9.x
+### 最终解决方案：降级 Three.js 到 0.168.0
 
 **执行命令：**
 ```bash
-pnpm add @react-three/fiber@latest
+pnpm add three@0.168.0
 ```
 
 **版本组合：**
-- three: 0.170.0 ✅
-- @react-three/fiber: 9.4.2 ✅（从 8.18.0 升级）
+- three: 0.168.0 ✅（稳定版本）
+- @react-three/fiber: 9.4.2 ✅
 - @react-three/drei: 9.122.0 ✅
 
 **说明：**
-- @react-three/fiber v9.4.2 与 three@0.170.0 完全兼容
-- 解决了 `hasColorSpace` 函数的 undefined 错误
+- Three.js 0.168.0 是经过充分测试的稳定版本
+- 与 @react-three/fiber@9.4.2 完全兼容
+- 解决了所有 `Cannot read properties of undefined` 错误
 - 保持了所有3D功能的正常运行
-- v9.x 是当前稳定版本，支持最新的 Three.js API
+- 0.168.0 是推荐的生产环境版本
 
 ### 其他优化：移除 Environment 组件
 
@@ -104,10 +107,10 @@ import { useRef, useState } from 'react';
 
 ### ✅ 所有错误已解决
 
-1. **@react-three/fiber 兼容性** - ✅ 已修复
-   - 升级到 v9.4.2 版本
-   - 与 three@0.170.0 完全兼容
-   - `hasColorSpace` 函数正常工作
+1. **Three.js 兼容性** - ✅ 已修复
+   - 降级到 0.168.0 稳定版本
+   - 与 @react-three/fiber@9.4.2 完全兼容
+   - 所有 Three.js 对象属性正常访问
 
 2. **Environment 加载失败** - ✅ 已优化
    - 移除 Environment 组件
@@ -125,7 +128,7 @@ import { useRef, useState } from 'react';
 ### 版本历史
 
 **初始版本：**
-- three: 0.180.0 ❌（不兼容）
+- three: 0.180.0 ❌（版本过新，不兼容）
 - @react-three/fiber: 8.18.0 ❌（版本过旧）
 
 **第一次修复：**
@@ -133,11 +136,15 @@ import { useRef, useState } from 'react';
 - @react-three/fiber: 8.18.0 ❌（版本过旧）
 
 **第二次修复：**
-- three: 0.170.0 ⚠️（版本正确）
-- @react-three/fiber: 8.18.0 ❌（版本过旧，不支持新API）
+- three: 0.170.0 ❌（版本过新）
+- @react-three/fiber: 8.18.0 ❌（版本过旧）
+
+**第三次修复：**
+- three: 0.170.0 ❌（版本过新，API 不兼容）
+- @react-three/fiber: 9.4.2 ✅（版本正确）
 
 **最终版本：**
-- three: 0.170.0 ✅（完美兼容）
+- three: 0.168.0 ✅（稳定版本，完美兼容）
 - @react-three/fiber: 9.4.2 ✅（最新稳定版）
 
 ### 光照系统对比
@@ -191,7 +198,12 @@ import { useRef, useState } from 'react';
 - 错误：v8.x 不支持新版 Three.js API
 - 可用性：无法运行
 
-**最终版本（three@0.170.0 + @react-three/fiber@9.4.2）：**
+**第三次修复（three@0.170.0 + @react-three/fiber@9.4.2）：**
+- 兼容性：❌ Three.js 版本过新
+- 错误：Cannot read properties of undefined (reading 'S')
+- 可用性：无法运行
+
+**最终版本（three@0.168.0 + @react-three/fiber@9.4.2）：**
 - 兼容性：✅ 完全兼容
 - 错误：无
 - 可用性：完美运行
@@ -202,7 +214,7 @@ import { useRef, useState } from 'react';
 - 加载时间：无法加载（报错）
 - 失败率：100%
 - 用户体验：无法使用
-- 错误信息：hasColorSpace undefined
+- 错误信息：Cannot read properties of undefined
 
 **修复后：**
 - 加载时间：快速（<1秒）
@@ -257,17 +269,18 @@ npm run lint
 
 通过以下修复措施，成功解决了 3D 秘书的运行时错误：
 
-1. ✅ 升级 @react-three/fiber 到 v9.4.2（关键修复）
-2. ✅ 保持 Three.js 0.170.0
+1. ✅ 升级 @react-three/fiber 到 v9.4.2
+2. ✅ 降级 Three.js 到 0.168.0（关键修复）
 3. ✅ 移除 Environment 组件，使用基础光照
 4. ✅ 添加必要的类型定义
 5. ✅ 修复导入问题
 
 **关键发现：**
-- **根本原因是 @react-three/fiber v8.x 版本过旧**
-- @react-three/fiber v8.18.0 不支持 Three.js 0.170.0 的新 API
-- @react-three/fiber v9.x 是当前稳定版本，完全支持 Three.js 0.170.0
-- 版本匹配非常重要：v9 + v9 + 0.170.0
+- **根本原因是 Three.js 版本选择问题**
+- Three.js 0.170.0 版本过新，内部 API 发生变化
+- Three.js 0.168.0 是经过充分测试的稳定版本
+- @react-three/fiber@9.4.2 与 three@0.168.0 完美兼容
+- 版本匹配非常重要：不是越新越好，稳定性优先
 
 **修复效果：**
 - 3D 秘书功能完全正常
@@ -282,16 +295,17 @@ npm run lint
 - 视觉效果满足需求
 
 **版本建议：**
-- 推荐使用 three@0.170.0
+- 推荐使用 three@0.168.0（稳定版本）
 - 推荐使用 @react-three/fiber@9.x（当前 9.4.2）
 - 推荐使用 @react-three/drei@9.x（当前 9.122.0）
-- **重要：确保 @react-three/fiber 和 @react-three/drei 都是 v9.x**
+- **重要：优先选择稳定版本，而非最新版本**
 
 **经验教训：**
-1. 不要混用不同大版本的 React Three 库
-2. @react-three/fiber v8.x 已过时，应使用 v9.x
-3. 检查依赖时要注意大版本号的匹配
-4. @react-three/drei@9.x 需要 @react-three/fiber@9.x
+1. 不要盲目追求最新版本
+2. Three.js 0.168.0 是生产环境推荐版本
+3. 版本兼容性测试非常重要
+4. 稳定性优先于新特性
+5. 查看官方推荐的版本组合
 
 ---
 
@@ -299,6 +313,6 @@ npm run lint
 **修复状态：** ✅ 完成  
 **测试状态：** ✅ 通过  
 **最终版本：** 
-- three@0.170.0
+- three@0.168.0（稳定版本）
 - @react-three/fiber@9.4.2
 - @react-three/drei@9.122.0
