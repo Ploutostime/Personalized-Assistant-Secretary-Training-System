@@ -12,12 +12,41 @@ interface SecretaryCardProps {
 
 // 形象类型映射
 const avatarTypeMap: Record<string, string> = {
+  // 经典系列
   loli: '萝莉',
   oneesan: '御姐',
   uncle: '大叔',
   boss: '霸总',
   senior_sister: '学姐',
   senior_brother: '学长',
+  // 奇幻系列
+  elf_queen: '精灵女王',
+  imperial_knight: '帝国骑士',
+  slime_girl: '史莱姆娘',
+  werewolf_girl: '狼人少女',
+  // 古风系列
+  imperial_consort: '贵妃',
+  empress: '皇后',
+  regent_prince: '摄政王',
+  jiangnan_girl: '江南小妹',
+  // 现代系列
+  neighbor_sister: '邻家姐姐',
+};
+
+// 形象分类映射
+const categoryMap: Record<string, string> = {
+  classic: '经典',
+  fantasy: '奇幻',
+  historical: '古风',
+  modern: '现代',
+};
+
+// 形象分类颜色
+const categoryColor: Record<string, string> = {
+  classic: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  fantasy: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  historical: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  modern: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 };
 
 // 性格类型映射
@@ -40,12 +69,25 @@ const outfitTypeMap: Record<string, string> = {
 
 // 形象类型图标
 const avatarTypeIcon: Record<string, string> = {
+  // 经典系列
   loli: '🌸',
   oneesan: '💐',
   uncle: '🎩',
   boss: '👔',
   senior_sister: '📚',
   senior_brother: '⚡',
+  // 奇幻系列
+  elf_queen: '🧝',
+  imperial_knight: '⚔️',
+  slime_girl: '💧',
+  werewolf_girl: '🐺',
+  // 古风系列
+  imperial_consort: '🌺',
+  empress: '👑',
+  regent_prince: '🗡️',
+  jiangnan_girl: '🌸',
+  // 现代系列
+  neighbor_sister: '🏠',
 };
 
 // 性格类型图标
@@ -148,15 +190,23 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
               {(type !== 'avatar' || !getAvatarImage()) && (
                 <span className="text-2xl">{getTypeIcon()}</span>
               )}
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold">{item.name}</h3>
-                <Badge variant="secondary" className="text-xs">
-                  {getTypeLabel()}
-                </Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {getTypeLabel()}
+                  </Badge>
+                  {/* 显示形象分类 */}
+                  {type === 'avatar' && (item as SecretaryAvatar).category && (
+                    <Badge className={`text-xs ${categoryColor[(item as SecretaryAvatar).category!] || ''}`}>
+                      {categoryMap[(item as SecretaryAvatar).category!] || ''}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             {item.description && (
-              <p className="text-sm text-muted-foreground mt-2">{item.description}</p>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.description}</p>
             )}
           </div>
           

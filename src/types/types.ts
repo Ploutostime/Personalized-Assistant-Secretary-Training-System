@@ -162,7 +162,47 @@ export interface UserPreferences {
 }
 
 // 秘书形象类型
-export type SecretaryAvatarType = 'loli' | 'oneesan' | 'uncle' | 'boss' | 'senior_sister' | 'senior_brother';
+// 秘书形象类型
+export type SecretaryAvatarType = 
+  | 'loli' | 'oneesan' | 'uncle' | 'boss' | 'senior_sister' | 'senior_brother'  // 经典系列
+  | 'elf_queen' | 'imperial_knight' | 'slime_girl' | 'werewolf_girl'  // 奇幻系列
+  | 'imperial_consort' | 'empress' | 'regent_prince' | 'jiangnan_girl'  // 古风系列
+  | 'neighbor_sister';  // 现代系列
+
+// 秘书形象分类
+export type SecretaryCategory = 'classic' | 'fantasy' | 'historical' | 'modern';
+
+// 性格特征接口
+export interface PersonalityTraits {
+  cheerful?: number;  // 开朗度 0-100
+  gentle?: number;    // 温柔度 0-100
+  strict?: number;    // 严格度 0-100
+  playful?: number;   // 活泼度 0-100
+  wise?: number;      // 智慧度 0-100
+  brave?: number;     // 勇敢度 0-100
+  elegant?: number;   // 优雅度 0-100
+  wild?: number;      // 野性度 0-100
+  mysterious?: number; // 神秘度 0-100
+  [key: string]: number | undefined;  // 允许其他自定义特征
+}
+
+// 语音配置接口
+export interface VoiceConfig {
+  pitch: number;      // 音调 0.5-2.0
+  speed: number;      // 语速 0.5-2.0
+  voice_id: string;   // 语音ID
+  emotion: string;    // 情感类型
+  echo?: number;      // 回声效果 0-1
+}
+
+// 动画配置接口
+export interface AnimationConfig {
+  idle: string;       // 待机动作
+  talking: string;    // 说话动作
+  thinking: string;   // 思考动作
+  greeting: string;   // 打招呼动作
+  [key: string]: string;  // 允许其他自定义动作
+}
 
 // 秘书性格类型
 export type SecretaryPersonalityType = 'gentle' | 'strict' | 'lively' | 'calm' | 'motivating';
@@ -179,6 +219,12 @@ export interface SecretaryAvatar {
   avatar_url: string | null;
   full_body_url?: string | null; // 全身立绘图片URL
   voice_type: string | null;
+  personality_traits?: PersonalityTraits | null; // 性格特征
+  voice_config?: VoiceConfig | null; // 语音配置
+  animation_config?: AnimationConfig | null; // 动画配置
+  dialogue_style?: string | null; // 对话风格描述
+  model_3d_url?: string | null; // 3D模型URL
+  category?: SecretaryCategory; // 形象分类
   created_at: string;
 }
 
