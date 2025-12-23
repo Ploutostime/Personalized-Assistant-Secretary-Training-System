@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, MessageCircle, X } from 'lucide-react';
 import { supabase } from '@/db/supabase';
-import Secretary3DScene from './Secretary3DScene';
+import { getSecretaryAvatarByType } from '@/db/api';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,7 +28,13 @@ export default function SecretaryChat({ secretaryConfig, userId, onClose }: Secr
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 加载秘书头像
+  useEffect(() => {
+    loadAvatar();
+  }, [secretaryConfig.avatarType]);
 
   // 加载历史对话
   useEffect(() => {
@@ -41,6 +47,17 @@ export default function SecretaryChat({ secretaryConfig, userId, onClose }: Secr
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const loadAvatar = async () => {
+    try {
+      const avatar = await getSecretaryAvatarByType(secretaryConfig.avatarType);
+      if (avatar) {
+        setAvatarUrl(avatar.avatar_url || '');
+      }
+    } catch (error) {
+      console.error('加载秘书头像失败:', error);
+    }
+  };
 
   const loadChatHistory = async () => {
     try {
@@ -146,9 +163,24 @@ export default function SecretaryChat({ secretaryConfig, userId, onClose }: Secr
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col gap-4 min-h-0">
-        {/* 3D角色显示 */}
-        <div className="w-full h-48 bg-gradient-to-b from-primary/5 to-secondary/10 rounded-lg overflow-hidden">
-          <Secretary3DScene avatarType={secretaryConfig.avatarType} isTalking={isTalking} />
+        {/* 秘书头像显示 */}
+        <div className="w-full h-48 bg-gradient-to-b from-primary/5 to-secondary/10 rounded-lg overflow-hidden flex items-center justify-center">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={secretaryConfig.name}
+              className={`h-full w-auto object-contain transition-all duration-300 ${
+                isTalking ? 'animate-bounce-subtle' : 'animate-float'
+              }`}
+              style={{
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              }}
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
+              <MessageCircle className="w-12 h-12 text-primary/40" />
+            </div>
+          )}
         </div>
 
         {/* 对话区域 */}
@@ -213,6 +245,35 @@ export default function SecretaryChat({ secretaryConfig, userId, onClose }: Secr
           </Button>
         </div>
       </CardContent>
+
+      {/* CSS动画样式 */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes bounce-subtle {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-bounce-subtle {
+          animation: bounce-subtle 0.5s ease-in-out infinite;
+        }
+      `}</style>
     </Card>
   );
 }

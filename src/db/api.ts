@@ -651,6 +651,21 @@ export async function getSecretaryAvatarById(id: string): Promise<SecretaryAvata
   return data;
 }
 
+// 根据类型获取秘书形象
+export async function getSecretaryAvatarByType(type: string): Promise<SecretaryAvatar | null> {
+  const { data, error } = await supabase
+    .from('secretary_avatars')
+    .select('*')
+    .eq('type', type)
+    .maybeSingle();
+
+  if (error) {
+    console.error('获取秘书形象失败:', error);
+    return null;
+  }
+  return data;
+}
+
 // 获取所有秘书性格
 export async function getSecretaryPersonalities(): Promise<SecretaryPersonality[]> {
   const { data, error } = await supabase

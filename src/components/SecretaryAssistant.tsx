@@ -8,7 +8,6 @@ import type { SecretaryConfig } from '@/types/types';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SecretaryChat from './SecretaryChat';
-import Secretary3DScene from './Secretary3DScene';
 
 export function SecretaryAssistant() {
   const { user } = useAuth();
@@ -126,13 +125,29 @@ export function SecretaryAssistant() {
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
-          {/* 秘书3D形象 */}
+          {/* 秘书2D形象 */}
           <div className="flex-shrink-0">
-            <div className="w-48 h-56 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10">
-              <Secretary3DScene 
-                avatarType={config.avatar?.type || 'oneesan'} 
-                isTalking={false}
-              />
+            <div className="w-48 h-56 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10 flex items-end justify-center">
+              {getFullBodyImage() ? (
+                <img
+                  src={getFullBodyImage()!}
+                  alt={config.name}
+                  className="h-full w-auto object-contain object-bottom animate-float"
+                  style={{
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  }}
+                />
+              ) : getAvatarImage() ? (
+                <img
+                  src={getAvatarImage()!}
+                  alt={config.name}
+                  className="w-32 h-32 rounded-full object-cover animate-float"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center text-6xl">
+                  {getAvatarIcon()}
+                </div>
+              )}
             </div>
           </div>
 
@@ -189,6 +204,22 @@ export function SecretaryAssistant() {
           </Dialog>
         )}
       </CardContent>
+
+      {/* CSS动画样式 */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
     </Card>
   );
 }
