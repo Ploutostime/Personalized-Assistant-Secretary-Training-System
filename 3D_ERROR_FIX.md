@@ -30,6 +30,14 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'S')
     at handleTextInstance (/node_modules/.pnpm/@react-three+fiber@9.4.2_@types+react@19.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1_three@0.168.0/node_modules/@react-three/fiber/dist/events-1eccaf1c.esm.js:1650:34)
 ```
 
+### 错误5：条件渲染导致的文本节点错误（第三次）
+```
+Uncaught TypeError: Cannot read properties of undefined (reading 'S')
+    at listeners.forEach(function (/node_modules/.pnpm/react-reconciler@0.31.0_react@18.3.1/node_modules/react-reconciler/cjs/react-reconciler.development.js:15915:57)
+    at createReconciler (/node_modules/.pnpm/@react-three+fiber@9.4.2_@types+react@19.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1_three@0.168.0/node_modules/@react-three/fiber/dist/events-1eccaf1c.esm.js:1351:32)
+    at handleTextInstance (/node_modules/.pnpm/@react-three+fiber@9.4.2_@types+react@19.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1_three@0.168.0/node_modules/@react-three/fiber/dist/events-1eccaf1c.esm.js:1650:34)
+```
+
 **根本原因分析：**
 1. Three.js 版本过新（0.180.0）导致 API 不兼容
 2. @react-three/fiber 版本过旧（8.18.0）不支持新版 Three.js
@@ -38,10 +46,11 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'S')
 5. 使用 @ts-nocheck 隐藏了类型错误
 6. @react-three/drei 使用 catalog: 导致版本不确定
 7. **Canvas 和 group 内部的空行被 React 解析为文本节点**
+8. **条件渲染使用 && 运算符时，false 值可能被 React 解析为文本节点**
 
 ## 修复方案
 
-### 最终解决方案：六个关键修复
+### 最终解决方案：七个关键修复
 
 #### 1. 版本兼容性修复
 
@@ -212,6 +221,41 @@ import { useRef } from 'react';
 - 必须保持 Canvas 和 group 内部绝对紧凑，无任何空行
 - JSX 注释和空行都会导致 "Cannot read properties of undefined (reading 'S')" 错误
 
+#### 7. 修复条件渲染的文本节点问题
+
+**修改文件：** `src/components/Secretary3DScene.tsx`
+
+**问题代码（使用 && 运算符）：**
+```tsx
+<group>
+  {istalking && (
+    <mesh position={[0, 0.9, 0.32]}>
+      <sphereGeometry args={[0.08, 16, 16]} />
+      <meshStandardMaterial color="#FF6B6B" />
+    </mesh>
+  )}
+</group>
+```
+
+**修复后（使用三元运算符）：**
+```tsx
+<group>
+  {istalking ? (
+    <mesh position={[0, 0.9, 0.32]}>
+      <sphereGeometry args={[0.08, 16, 16]} />
+      <meshStandardMaterial color="#FF6B6B" />
+    </mesh>
+  ) : null}
+</group>
+```
+
+**说明：**
+- 使用 `&&` 运算符时，当条件为 false，React 可能将 false 值解析为文本节点
+- React Three Fiber 的 handleTextInstance 无法处理这些隐式的 false 值
+- 使用显式的三元运算符 `condition ? element : null` 更安全
+- 明确返回 null 而不是 false，避免任何文本节点的产生
+- 这是 React Three Fiber 中条件渲染的最佳实践
+
 ### 其他优化：移除 Environment 组件
 
 **修改文件：** `src/components/Secretary3DScene.tsx`
@@ -311,12 +355,18 @@ import { useRef, useState } from 'react';
    - 保持代码紧凑，无空白文本节点
    - 彻底消除文本节点错误
 
-7. **Environment 加载** - ✅ 已优化
+7. **条件渲染** - ✅ 已修复
+   - 将 `{condition && element}` 改为 `{condition ? element : null}`
+   - 避免 false 值被解析为文本节点
+   - 使用显式的三元运算符更安全
+   - 符合 React Three Fiber 最佳实践
+
+8. **Environment 加载** - ✅ 已优化
    - 移除 Environment 组件
    - 使用基础光照系统替代
    - 避免外部文件依赖
 
-8. **ESLint 检查** - ✅ 通过
+9. **ESLint 检查** - ✅ 通过
    - 90个文件检查通过
    - 0个错误
    - 0个警告
@@ -351,6 +401,10 @@ import { useRef, useState } from 'react';
 1. Canvas 和 group 内部包含空行 ❌
 2. 移除所有空行 ✅（最终彻底解决）
 
+**第七阶段：条件渲染优化**
+1. 使用 `{condition && element}` 条件渲染 ❌
+2. 改为 `{condition ? element : null}` ✅（显式返回 null）
+
 **最终版本（完美运行）：**
 - three: 0.168.0 ✅
 - @react-three/fiber: 9.4.2 ✅
@@ -359,6 +413,7 @@ import { useRef, useState } from 'react';
 - Canvas: 无 JSX 注释 ✅
 - Canvas: 无空行 ✅
 - group: 无空行 ✅
+- 条件渲染: 使用三元运算符 ✅
 - TypeScript: 无 @ts-nocheck ✅
 - 依赖: 版本固定 ✅
 
@@ -505,6 +560,7 @@ npm run lint
 7. ✅ 代码优化：移除未使用的导入和状态
 8. ✅ 环境优化：移除 Environment 组件，使用基础光照
 9. ✅ **文本节点：移除 Canvas 和 group 内部的所有空行**
+10. ✅ **条件渲染：使用三元运算符代替 && 运算符**
 
 ### 关键发现
 
@@ -525,9 +581,11 @@ npm run lint
 - **Canvas 内部不应包含任何文本节点**
 - JSX 注释（{/* */}）会被视为文本节点
 - **空行也会被 React 解析为文本节点**
+- **条件渲染的 false 值也可能被解析为文本节点**
 - handleTextInstance 函数会尝试处理文本节点并失败
 - 使用常规 JavaScript 注释（//）或在 Canvas 外部注释
 - **必须保持 Canvas 和 group 内部绝对紧凑，无任何空行**
+- **条件渲染必须使用三元运算符 `condition ? element : null`**
 - 这是导致 "Cannot read properties of undefined (reading 'S')" 错误的根本原因
 
 #### 4. TypeScript 类型安全
@@ -601,10 +659,12 @@ npm run lint
 - ❌ 不要在 Canvas 内部使用 JSX 注释（{/* */}）
 - ❌ **不要在 Canvas 内部留空行**
 - ❌ **不要在 group 内部留空行**
+- ❌ **不要使用 `{condition && element}` 条件渲染**
 - ✅ 使用常规 JavaScript 注释（//）
 - ✅ 或在 Canvas 外部添加注释
 - ✅ 保持 Canvas 内部只有 Three.js 对象
 - ✅ **保持代码紧凑，无任何空白**
+- ✅ **使用 `{condition ? element : null}` 条件渲染**
 
 **3. 类型安全规则：**
 - ❌ 不要使用 @ts-nocheck
@@ -653,7 +713,9 @@ npm run lint
 6. **Canvas 纯净性至关重要**
    - **JSX 注释会导致文本节点错误**
    - **空行也会导致文本节点错误**
+   - **条件渲染的 false 值也会导致文本节点错误**
    - 必须保持 Canvas 内部绝对纯净
+   - 条件渲染必须使用三元运算符
    - 这是最容易被忽视但最致命的问题
 
 ---
@@ -671,6 +733,7 @@ npm run lint
 - Canvas: 无 JSX 注释 ✅
 - Canvas: 无空行 ✅
 - group: 无空行 ✅
+- 条件渲染: 使用三元运算符 ✅
 - TypeScript: 无 @ts-nocheck ✅
 - 依赖: 版本固定 ✅
 
@@ -679,5 +742,6 @@ npm run lint
 **关键提示：**
 - ⚠️ Canvas 和 group 内部绝对不能有空行
 - ⚠️ Canvas 和 group 内部绝对不能有 JSX 注释
-- ⚠️ 这两点是导致 "Cannot read properties of undefined (reading 'S')" 错误的根本原因
-- ✅ 保持代码紧凑，无任何空白，才能确保 React Three Fiber 正常工作
+- ⚠️ Canvas 和 group 内部必须使用三元运算符进行条件渲染
+- ⚠️ 这三点是导致 "Cannot read properties of undefined (reading 'S')" 错误的根本原因
+- ✅ 保持代码紧凑，无任何空白，使用显式的 null 返回，才能确保 React Three Fiber 正常工作
