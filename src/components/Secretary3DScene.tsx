@@ -41,19 +41,16 @@ function Character3D({ avatarType, istalking }: { avatarType: string; istalking:
 
   return (
     <group>
-      {/* 身体 */}
       <mesh ref={meshRef} position={[0, 0, 0]}>
         <capsuleGeometry args={[0.3, 1, 16, 32]} />
         <meshStandardMaterial color={getColor()} />
       </mesh>
       
-      {/* 头部 */}
       <mesh position={[0, 1, 0]}>
         <sphereGeometry args={[0.35, 32, 32]} />
         <meshStandardMaterial color={getColor()} />
       </mesh>
       
-      {/* 眼睛 */}
       <mesh position={[-0.12, 1.1, 0.3]}>
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshStandardMaterial color="#000000" />
@@ -63,7 +60,6 @@ function Character3D({ avatarType, istalking }: { avatarType: string; istalking:
         <meshStandardMaterial color="#000000" />
       </mesh>
       
-      {/* 嘴巴 - 说话时会动 */}
       {istalking && (
         <mesh position={[0, 0.9, 0.32]}>
           <sphereGeometry args={[0.08, 16, 16]} />
@@ -71,7 +67,6 @@ function Character3D({ avatarType, istalking }: { avatarType: string; istalking:
         </mesh>
       )}
       
-      {/* 手臂 */}
       <mesh position={[-0.4, 0.3, 0]} rotation={[0, 0, 0.3]}>
         <capsuleGeometry args={[0.08, 0.6, 8, 16]} />
         <meshStandardMaterial color={getColor()} />
@@ -81,7 +76,6 @@ function Character3D({ avatarType, istalking }: { avatarType: string; istalking:
         <meshStandardMaterial color={getColor()} />
       </mesh>
       
-      {/* 腿 */}
       <mesh position={[-0.15, -0.8, 0]}>
         <capsuleGeometry args={[0.1, 0.8, 8, 16]} />
         <meshStandardMaterial color={getColor()} />
@@ -115,16 +109,13 @@ export default function Secretary3DScene({
           maxPolarAngle={Math.PI / 2}
         />
         
-        {/* 灯光 */}
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
         <pointLight position={[-5, 5, -5]} intensity={0.8} />
         <hemisphereLight skyColor="#ffffff" groundColor="#60a5fa" intensity={0.5} />
         
-        {/* 3D角色 */}
         <Character3D avatarType={avatarType} istalking={isTalking} />
         
-        {/* 地面 */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
           <planeGeometry args={[10, 10]} />
           <meshStandardMaterial color="#f0f0f0" />
