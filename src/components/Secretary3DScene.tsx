@@ -55,12 +55,12 @@ function Character3D({ avatarType, istalking }: { avatarType: string; istalking:
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
-      {istalking && (
+      {istalking ? (
         <mesh position={[0, 0.9, 0.32]}>
           <sphereGeometry args={[0.08, 16, 16]} />
           <meshStandardMaterial color="#FF6B6B" />
         </mesh>
-      )}
+      ) : null}
       <mesh position={[-0.4, 0.3, 0]} rotation={[0, 0, 0.3]}>
         <capsuleGeometry args={[0.08, 0.6, 8, 16]} />
         <meshStandardMaterial color={getColor()} />
