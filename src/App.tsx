@@ -18,6 +18,7 @@ const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const VideoTerminalPage = lazy(() => import('./pages/VideoTerminalPage'));
+const SecretaryPage = lazy(() => import('./pages/SecretaryPage'));
 
 // 延迟加载2D浮窗秘书
 const SecretaryFloatingWidget = lazy(() => import('./components/SecretaryFloatingWidget').then(module => ({ default: module.SecretaryFloatingWidget })));
@@ -36,6 +37,7 @@ const App: React.FC = () => {
                 <Route path="schedule" element={<SchedulePage />} />
                 <Route path="knowledge" element={<KnowledgePage />} />
                 <Route path="video-terminal" element={<VideoTerminalPage />} />
+                <Route path="secretary" element={<SecretaryPage />} />
                 <Route path="statistics" element={<StatisticsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="admin" element={<AdminPage />} />

@@ -24,6 +24,7 @@ import {
   Shield,
   GraduationCap,
   Video,
+  Sparkles,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ const navigation = [
   { name: '时间表', href: '/schedule', icon: Calendar },
   { name: '知识收藏', href: '/knowledge', icon: BookMarked },
   { name: '私人终端', href: '/video-terminal', icon: Video },
+  { name: '秘书形象', href: '/secretary', icon: Sparkles },
   { name: '学习统计', href: '/statistics', icon: BarChart3 },
   { name: '设置', href: '/settings', icon: Settings },
 ];
