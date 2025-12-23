@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
-import { X, Minimize2, Maximize2, MessageCircle } from 'lucide-react';
+import { X, Minimize2, Maximize2, MessageCircle, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserSecretaryConfig, generateSecretaryGreeting, generateSecretaryReminder, generateSecretaryEncouragement, getUpcomingTasks } from '@/db/api';
 import type { SecretaryConfig } from '@/types/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import SecretaryChat from './SecretaryChat';
+import Secretary3DScene from './Secretary3DScene';
 
 interface Position {
   x: number;
@@ -21,6 +24,7 @@ export function FloatingSecretary() {
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [currentMessage, setCurrentMessage] = useState<string>('');
   const [messageType, setMessageType] = useState<'greeting' | 'reminder' | 'encouragement'>('greeting');
+  const [showChatDialog, setShowChatDialog] = useState(false);
   const floatingRef = useRef<HTMLDivElement>(null);
 
   // 加载秘书配置
@@ -283,24 +287,32 @@ export function FloatingSecretary() {
           </div>
 
           <div className="p-4 max-w-xs">
-            {/* 全身人物显示 */}
-            {getFullBodyImage() && (
-              <div className="mb-3 flex justify-center">
-                <div className="w-28 h-36 flex items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-primary/5 to-secondary/10">
-                  <img 
-                    src={getFullBodyImage()!} 
-                    alt={config.name}
-                    className="h-full w-auto object-contain object-bottom"
-                  />
-                </div>
-              </div>
-            )}
+            {/* 3D人物显示 */}
+            <div className="mb-3 w-full h-40 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10">
+              <Secretary3DScene 
+                avatarType={config.avatar?.type || 'oneesan'} 
+                isTalking={false}
+              />
+            </div>
 
             {/* 对话气泡 */}
             <div className="relative bg-background/80 rounded-lg p-3 shadow-sm">
               <p className="text-sm leading-relaxed">{currentMessage}</p>
               {/* 气泡尾巴 */}
               <div className="absolute -bottom-2 left-4 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-background/80" />
+            </div>
+
+            {/* AI对话按钮 */}
+            <div className="mt-3 flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowChatDialog(true)}
+                className="gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                与 {config.name} 对话
+              </Button>
             </div>
 
             {/* 秘书信息 */}
@@ -318,6 +330,23 @@ export function FloatingSecretary() {
             </div>
           </div>
         </Card>
+      )}
+
+      {/* AI对话弹窗 */}
+      {showChatDialog && config && user && (
+        <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+          <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+            <SecretaryChat
+              secretaryConfig={{
+                name: config.name,
+                avatarType: config.avatar?.type || 'oneesan',
+                personalityType: config.personality?.type || 'gentle',
+              }}
+              userId={user.id}
+              onClose={() => setShowChatDialog(false)}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

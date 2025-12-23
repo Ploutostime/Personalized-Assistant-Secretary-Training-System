@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Settings } from 'lucide-react';
+import { Sparkles, Settings, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserSecretaryConfig, generateSecretaryGreeting } from '@/db/api';
 import type { SecretaryConfig } from '@/types/types';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import SecretaryChat from './SecretaryChat';
+import Secretary3DScene from './Secretary3DScene';
 
 export function SecretaryAssistant() {
   const { user } = useAuth();
@@ -13,6 +16,7 @@ export function SecretaryAssistant() {
   const [config, setConfig] = useState<SecretaryConfig | null>(null);
   const [greeting, setGreeting] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [showChatDialog, setShowChatDialog] = useState(false);
 
   useEffect(() => {
     loadSecretaryConfig();
@@ -122,57 +126,68 @@ export function SecretaryAssistant() {
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
-          {/* 秘书全身形象 */}
+          {/* 秘书3D形象 */}
           <div className="flex-shrink-0">
-            {getFullBodyImage() ? (
-              <div className="w-32 h-48 flex items-end justify-center overflow-hidden rounded-lg bg-gradient-to-b from-primary/5 to-secondary/10">
-                <img 
-                  src={getFullBodyImage()!} 
-                  alt={config.name}
-                  className="h-full w-auto object-contain object-bottom"
-                />
-              </div>
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                {getAvatarImage() ? (
-                  <img 
-                    src={getAvatarImage()!} 
-                    alt={config.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-4xl">{getAvatarIcon()}</span>
+            <div className="w-48 h-56 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10">
+              <Secretary3DScene 
+                avatarType={config.avatar?.type || 'oneesan'} 
+                isTalking={false}
+              />
+            </div>
+          </div>
+
+          {/* 问候语和操作 */}
+          <div className="flex-1 space-y-4">
+            <div className="space-y-2">
+              <p className="text-lg leading-relaxed">{greeting}</p>
+              
+              {/* 秘书信息 */}
+              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                {config.avatar && (
+                  <span className="px-2 py-1 bg-background/60 rounded">
+                    {config.avatar.name}
+                  </span>
+                )}
+                {config.personality && (
+                  <span className="px-2 py-1 bg-background/60 rounded">
+                    {config.personality.name}
+                  </span>
+                )}
+                {config.outfit && (
+                  <span className="px-2 py-1 bg-background/60 rounded">
+                    {config.outfit.name}
+                  </span>
                 )}
               </div>
-            )}
-          </div>
-
-          {/* 问候语 */}
-          <div className="flex-1">
-            <div className="bg-background/80 rounded-lg p-4 shadow-sm">
-              <p className="text-sm leading-relaxed">{greeting}</p>
             </div>
 
-            {/* 秘书信息 */}
-            <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-              {config.avatar && (
-                <span className="px-2 py-1 bg-background/60 rounded">
-                  形象：{config.avatar.name}
-                </span>
-              )}
-              {config.personality && (
-                <span className="px-2 py-1 bg-background/60 rounded">
-                  性格：{config.personality.name}
-                </span>
-              )}
-              {config.outfit && (
-                <span className="px-2 py-1 bg-background/60 rounded">
-                  服装：{config.outfit.name}
-                </span>
-              )}
-            </div>
+            {/* AI对话按钮 */}
+            <Button
+              onClick={() => setShowChatDialog(true)}
+              className="gap-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              与 {config.name} 对话
+            </Button>
           </div>
         </div>
+
+        {/* AI对话弹窗 */}
+        {showChatDialog && user && (
+          <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+            <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+              <SecretaryChat
+                secretaryConfig={{
+                  name: config.name,
+                  avatarType: config.avatar?.type || 'oneesan',
+                  personalityType: config.personality?.type || 'gentle',
+                }}
+                userId={user.id}
+                onClose={() => setShowChatDialog(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </CardContent>
     </Card>
   );
