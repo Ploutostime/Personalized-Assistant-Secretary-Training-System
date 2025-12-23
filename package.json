@@ -37,7 +37,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-three/drei": "catalog:",
-    "@react-three/fiber": "catalog:",
+    "@react-three/fiber": "^9.4.2",
     "@supabase/supabase-js": "^2.76.1",
     "axios": "^1.13.1",
     "class-variance-authority": "^0.7.1",
