@@ -9,7 +9,7 @@
 Uncaught TypeError: Cannot read properties of undefined (reading 'hasColorSpace')
 ```
 
-### 错误2：参数传递问题
+### 错误2：参数传递问题（第一次）
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'S')
 at handleTextInstance (@react-three/fiber)
@@ -22,6 +22,14 @@ is not assignable to type 'HemisphereLight'
 Property 'skyColor' does not exist on type 'HemisphereLight'
 ```
 
+### 错误4：文本节点错误（第二次）
+```
+Uncaught TypeError: Cannot read properties of undefined (reading 'S')
+    at listeners.forEach(function (/node_modules/.pnpm/react-reconciler@0.31.0_react@18.3.1/node_modules/react-reconciler/cjs/react-reconciler.development.js:15915:57)
+    at createReconciler (/node_modules/.pnpm/@react-three+fiber@9.4.2_@types+react@19.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1_three@0.168.0/node_modules/@react-three/fiber/dist/events-1eccaf1c.esm.js:1351:32)
+    at handleTextInstance (/node_modules/.pnpm/@react-three+fiber@9.4.2_@types+react@19.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1_three@0.168.0/node_modules/@react-three/fiber/dist/events-1eccaf1c.esm.js:1650:34)
+```
+
 **根本原因分析：**
 1. Three.js 版本过新（0.180.0）导致 API 不兼容
 2. @react-three/fiber 版本过旧（8.18.0）不支持新版 Three.js
@@ -29,10 +37,11 @@ Property 'skyColor' does not exist on type 'HemisphereLight'
 4. hemisphereLight 属性名使用错误（skyColor 不存在）
 5. 使用 @ts-nocheck 隐藏了类型错误
 6. @react-three/drei 使用 catalog: 导致版本不确定
+7. **Canvas 和 group 内部的空行被 React 解析为文本节点**
 
 ## 修复方案
 
-### 最终解决方案：五个关键修复
+### 最终解决方案：六个关键修复
 
 #### 1. 版本兼容性修复
 
@@ -142,6 +151,67 @@ import { useRef } from 'react';
 }
 ```
 
+#### 6. 移除 Canvas 和 group 内部的所有空行
+
+**修改文件：** `src/components/Secretary3DScene.tsx`
+
+**问题代码（Canvas 内部有空行）：**
+```tsx
+<Canvas>
+  <PerspectiveCamera makeDefault position={[0, 0.5, 3]} />
+  <OrbitControls />
+  
+  <ambientLight intensity={0.6} />
+  <directionalLight />
+  
+  <Character3D />
+  
+  <mesh>...</mesh>
+</Canvas>
+```
+
+**问题代码（group 内部有空行）：**
+```tsx
+<group>
+  <mesh ref={meshRef}>...</mesh>
+  
+  <mesh position={[0, 1, 0]}>...</mesh>
+  
+  <mesh position={[-0.12, 1.1, 0.3]}>...</mesh>
+  
+  {istalking && <mesh>...</mesh>}
+  
+  <mesh position={[-0.4, 0.3, 0]}>...</mesh>
+</group>
+```
+
+**修复后（无空行）：**
+```tsx
+<Canvas>
+  <PerspectiveCamera makeDefault position={[0, 0.5, 3]} />
+  <OrbitControls />
+  <ambientLight intensity={0.6} />
+  <directionalLight />
+  <Character3D />
+  <mesh>...</mesh>
+</Canvas>
+
+<group>
+  <mesh ref={meshRef}>...</mesh>
+  <mesh position={[0, 1, 0]}>...</mesh>
+  <mesh position={[-0.12, 1.1, 0.3]}>...</mesh>
+  {istalking && <mesh>...</mesh>}
+  <mesh position={[-0.4, 0.3, 0]}>...</mesh>
+</group>
+```
+
+**说明：**
+- React Three Fiber 对 Canvas 内部的空白非常敏感
+- 即使是空行也会被 React 解析为文本节点
+- handleTextInstance 函数尝试处理这些文本节点时失败
+- 必须保持 Canvas 和 group 内部绝对紧凑，无任何空行
+- JSX 注释和空行都会导致 "Cannot read properties of undefined (reading 'S')" 错误
+
 ### 其他优化：移除 Environment 组件
 
 **修改文件：** `src/components/Secretary3DScene.tsx`
@@ -215,7 +285,7 @@ import { useRef, useState } from 'react';
    - @react-three/drei 固定版本 9.122.0
    - 所有版本完美兼容
 
-2. **Canvas 内部注释** - ✅ 已移除
+2. **Canvas 内部 JSX 注释** - ✅ 已移除
    - 移除所有 JSX 注释（{/* */}）
    - 避免文本节点被错误处理
    - 符合 React Three Fiber 的最佳实践
@@ -235,12 +305,18 @@ import { useRef, useState } from 'react';
    - 避免版本不确定性
    - 确保构建稳定性
 
-6. **Environment 加载** - ✅ 已优化
+6. **Canvas 和 group 内部空行** - ✅ 已移除
+   - 移除 Canvas 内部的所有空行
+   - 移除 group 内部的所有空行
+   - 保持代码紧凑，无空白文本节点
+   - 彻底消除文本节点错误
+
+7. **Environment 加载** - ✅ 已优化
    - 移除 Environment 组件
    - 使用基础光照系统替代
    - 避免外部文件依赖
 
-7. **ESLint 检查** - ✅ 通过
+8. **ESLint 检查** - ✅ 通过
    - 90个文件检查通过
    - 0个错误
    - 0个警告
@@ -259,7 +335,7 @@ import { useRef, useState } from 'react';
 2. 使用 props 方式（skyColor 属性） ❌（属性不存在）
 3. 使用 args 方式（数字格式） ✅（正确方式）
 
-**第三阶段：文本节点处理**
+**第三阶段：文本节点处理（JSX 注释）**
 1. Canvas 内部包含 JSX 注释 ❌
 2. 移除所有 JSX 注释 ✅
 
@@ -271,12 +347,18 @@ import { useRef, useState } from 'react';
 1. @react-three/drei 使用 catalog: ❌
 2. 固定版本 9.122.0 ✅
 
+**第六阶段：文本节点处理（空行）**
+1. Canvas 和 group 内部包含空行 ❌
+2. 移除所有空行 ✅（最终彻底解决）
+
 **最终版本（完美运行）：**
 - three: 0.168.0 ✅
 - @react-three/fiber: 9.4.2 ✅
 - @react-three/drei: 9.122.0 ✅
 - hemisphereLight: args 方式（数字格式） ✅
 - Canvas: 无 JSX 注释 ✅
+- Canvas: 无空行 ✅
+- group: 无空行 ✅
 - TypeScript: 无 @ts-nocheck ✅
 - 依赖: 版本固定 ✅
 
@@ -422,6 +504,7 @@ npm run lint
 6. ✅ 类型检查：移除 @ts-nocheck，修复所有类型错误
 7. ✅ 代码优化：移除未使用的导入和状态
 8. ✅ 环境优化：移除 Environment 组件，使用基础光照
+9. ✅ **文本节点：移除 Canvas 和 group 内部的所有空行**
 
 ### 关键发现
 
@@ -441,8 +524,11 @@ npm run lint
 #### 3. Canvas 纯净性要求
 - **Canvas 内部不应包含任何文本节点**
 - JSX 注释（{/* */}）会被视为文本节点
+- **空行也会被 React 解析为文本节点**
 - handleTextInstance 函数会尝试处理文本节点并失败
 - 使用常规 JavaScript 注释（//）或在 Canvas 外部注释
+- **必须保持 Canvas 和 group 内部绝对紧凑，无任何空行**
+- 这是导致 "Cannot read properties of undefined (reading 'S')" 错误的根本原因
 
 #### 4. TypeScript 类型安全
 - **不要使用 @ts-nocheck 隐藏错误**
@@ -513,9 +599,12 @@ npm run lint
 
 **2. Canvas 使用规则：**
 - ❌ 不要在 Canvas 内部使用 JSX 注释（{/* */}）
+- ❌ **不要在 Canvas 内部留空行**
+- ❌ **不要在 group 内部留空行**
 - ✅ 使用常规 JavaScript 注释（//）
 - ✅ 或在 Canvas 外部添加注释
 - ✅ 保持 Canvas 内部只有 Three.js 对象
+- ✅ **保持代码紧凑，无任何空白**
 
 **3. 类型安全规则：**
 - ❌ 不要使用 @ts-nocheck
@@ -534,7 +623,8 @@ npm run lint
 1. **系统化排查问题**
    - 从版本兼容性开始
    - 逐步排查参数传递
-   - 检查文本节点处理
+   - 检查文本节点处理（JSX 注释）
+   - **检查文本节点处理（空行）**
    - 验证类型定义
    - 确认依赖管理
 
@@ -560,6 +650,12 @@ npm run lint
    - 规范的注释方式
    - 无冗余代码
 
+6. **Canvas 纯净性至关重要**
+   - **JSX 注释会导致文本节点错误**
+   - **空行也会导致文本节点错误**
+   - 必须保持 Canvas 内部绝对纯净
+   - 这是最容易被忽视但最致命的问题
+
 ---
 
 **修复时间：** 2025-12-17  
@@ -573,7 +669,15 @@ npm run lint
 - @react-three/drei@9.122.0（固定版本）✅
 - hemisphereLight: args 方式（数字格式）✅
 - Canvas: 无 JSX 注释 ✅
+- Canvas: 无空行 ✅
+- group: 无空行 ✅
 - TypeScript: 无 @ts-nocheck ✅
 - 依赖: 版本固定 ✅
 
 **测试清单：** 详见 TEST_3D.md
+
+**关键提示：**
+- ⚠️ Canvas 和 group 内部绝对不能有空行
+- ⚠️ Canvas 和 group 内部绝对不能有 JSX 注释
+- ⚠️ 这两点是导致 "Cannot read properties of undefined (reading 'S')" 错误的根本原因
+- ✅ 保持代码紧凑，无任何空白，才能确保 React Three Fiber 正常工作
