@@ -14,6 +14,7 @@ declare global {
       ambientLight: any;
       directionalLight: any;
       pointLight: any;
+      hemisphereLight: any;
     }
   }
 }

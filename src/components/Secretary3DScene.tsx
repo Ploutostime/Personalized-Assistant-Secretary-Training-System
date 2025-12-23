@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 // 3D角色组件
@@ -116,18 +116,16 @@ export default function Secretary3DScene({
         />
         
         {/* 灯光 */}
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <pointLight position={[-5, 5, -5]} intensity={0.5} />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
+        <pointLight position={[-5, 5, -5]} intensity={0.8} />
+        <hemisphereLight args={['#ffffff', '#60a5fa', 0.5]} />
         
         {/* 3D角色 */}
         <Character3D avatarType={avatarType} istalking={isTalking} />
         
-        {/* 环境 */}
-        <Environment preset="sunset" />
-        
         {/* 地面 */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
           <planeGeometry args={[10, 10]} />
           <meshStandardMaterial color="#f0f0f0" />
         </mesh>
