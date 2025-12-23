@@ -15,6 +15,7 @@ import MainLayout from './components/layouts/MainLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RouteGuard } from '@/components/common/RouteGuard';
 import { Toaster } from '@/components/ui/sonner';
+import { FloatingSecretary } from '@/components/FloatingSecretary';
 
 const App: React.FC = () => {
   return (
@@ -37,6 +38,8 @@ const App: React.FC = () => {
           </Routes>
         </RouteGuard>
         <Toaster />
+        {/* 浮窗秘书 */}
+        <FloatingSecretary />
       </AuthProvider>
     </Router>
   );

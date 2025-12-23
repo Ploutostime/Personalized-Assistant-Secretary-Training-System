@@ -500,7 +500,7 @@ export default function SettingsPage() {
               <div className="space-y-0.5">
                 <Label>启用学习秘书</Label>
                 <p className="text-sm text-muted-foreground">
-                  开启后，秘书将在仪表盘为你提供问候和提醒
+                  开启后，秘书将在仪表盘和浮窗中为你提供问候和提醒
                 </p>
               </div>
               <Switch
