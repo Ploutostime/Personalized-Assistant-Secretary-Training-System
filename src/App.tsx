@@ -1,45 +1,53 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import TasksPage from './pages/TasksPage';
-import SchedulePage from './pages/SchedulePage';
-import KnowledgePage from './pages/KnowledgePage';
-import StatisticsPage from './pages/StatisticsPage';
-import SettingsPage from './pages/SettingsPage';
-import AdminPage from './pages/AdminPage';
-import VideoTerminalPage from './pages/VideoTerminalPage';
 import MainLayout from './components/layouts/MainLayout';
+import LoadingFallback from './components/LoadingFallback';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { RouteGuard } from '@/components/common/RouteGuard';
 import { Toaster } from '@/components/ui/sonner';
-import { FloatingSecretary } from '@/components/FloatingSecretary';
+
+// 延迟加载页面组件
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const TasksPage = lazy(() => import('./pages/TasksPage'));
+const SchedulePage = lazy(() => import('./pages/SchedulePage'));
+const KnowledgePage = lazy(() => import('./pages/KnowledgePage'));
+const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const VideoTerminalPage = lazy(() => import('./pages/VideoTerminalPage'));
+
+// 延迟加载浮窗秘书（包含3D组件）
+const FloatingSecretary = lazy(() => import('./components/FloatingSecretary').then(module => ({ default: module.FloatingSecretary })));
 
 const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
         <RouteGuard>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="tasks" element={<TasksPage />} />
-              <Route path="schedule" element={<SchedulePage />} />
-              <Route path="knowledge" element={<KnowledgePage />} />
-              <Route path="video-terminal" element={<VideoTerminalPage />} />
-              <Route path="statistics" element={<StatisticsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="admin" element={<AdminPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="tasks" element={<TasksPage />} />
+                <Route path="schedule" element={<SchedulePage />} />
+                <Route path="knowledge" element={<KnowledgePage />} />
+                <Route path="video-terminal" element={<VideoTerminalPage />} />
+                <Route path="statistics" element={<StatisticsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="admin" element={<AdminPage />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </RouteGuard>
         <Toaster />
-        {/* 浮窗秘书 */}
-        <FloatingSecretary />
+        <Suspense fallback={null}>
+          <FloatingSecretary />
+        </Suspense>
       </AuthProvider>
     </Router>
   );

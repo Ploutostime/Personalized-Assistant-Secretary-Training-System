@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,9 @@ import type { Task, KnowledgeItem, VideoRecommendation } from '@/types/types';
 import { Clock, ListTodo, BookMarked, TrendingUp, AlertCircle, CheckCircle2, Calendar, Video, Play, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { SecretaryAssistant } from '@/components/SecretaryAssistant';
+
+// 延迟加载秘书助手组件（包含3D渲染）
+const SecretaryAssistant = lazy(() => import('@/components/SecretaryAssistant').then(module => ({ default: module.SecretaryAssistant })));
 
 const priorityColors = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -109,7 +111,21 @@ export default function DashboardPage() {
       </div>
 
       {/* 秘书助手 */}
-      <SecretaryAssistant />
+      <Suspense fallback={
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-24 h-32 bg-muted" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32 bg-muted" />
+                <Skeleton className="h-3 w-48 bg-muted" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      }>
+        <SecretaryAssistant />
+      </Suspense>
 
       {/* 统计卡片 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -308,6 +324,7 @@ export default function DashboardPage() {
                           src={video.video_cover}
                           alt={video.video_title}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="h-8 w-8 text-white" />

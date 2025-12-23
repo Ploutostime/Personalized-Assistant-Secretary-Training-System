@@ -235,6 +235,7 @@ export function FloatingSecretary() {
                   src={getAvatarImage()!} 
                   alt={config.name}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <span className="text-2xl">{getAvatarIcon()}</span>
@@ -258,6 +259,7 @@ export function FloatingSecretary() {
                       src={getAvatarImage()!} 
                       alt={config.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <span className="text-xl">{getAvatarIcon()}</span>

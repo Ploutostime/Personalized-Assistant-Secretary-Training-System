@@ -488,6 +488,7 @@ export default function VideoTerminalPage() {
                         src={video.video_cover}
                         alt={video.video_title}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                       {video.duration && (
                         <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">

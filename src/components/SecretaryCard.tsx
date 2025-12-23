@@ -122,6 +122,7 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
                   src={getFullBodyImage()!} 
                   alt={item.name}
                   className="h-full w-auto object-contain object-bottom"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -135,6 +136,7 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
                   src={getAvatarImage()!} 
                   alt={item.name}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>

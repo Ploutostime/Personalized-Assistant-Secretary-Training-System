@@ -1,13 +1,18 @@
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import TasksPage from './pages/TasksPage';
-import SchedulePage from './pages/SchedulePage';
-import KnowledgePage from './pages/KnowledgePage';
-import StatisticsPage from './pages/StatisticsPage';
-import SettingsPage from './pages/SettingsPage';
-import AdminPage from './pages/AdminPage';
-import MainLayout from './components/layouts/MainLayout';
+import { lazy } from 'react';
 import type { ReactNode } from 'react';
+
+// 立即加载的关键组件
+import LoginPage from './pages/LoginPage';
+import MainLayout from './components/layouts/MainLayout';
+
+// 延迟加载的页面组件
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const TasksPage = lazy(() => import('./pages/TasksPage'));
+const SchedulePage = lazy(() => import('./pages/SchedulePage'));
+const KnowledgePage = lazy(() => import('./pages/KnowledgePage'));
+const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 
 interface RouteConfig {
   name: string;
