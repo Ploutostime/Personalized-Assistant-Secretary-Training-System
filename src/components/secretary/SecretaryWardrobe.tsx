@@ -30,6 +30,7 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
   const [availableOutfits, setAvailableOutfits] = useState<OutfitWithImage[]>([]);
   const [selectedOutfitId, setSelectedOutfitId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
   // 播放秘书语音
@@ -142,28 +143,75 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
 
   // 保存用户选择
   const handleSaveSelection = async () => {
-    if (!selectedSecretary || !selectedOutfitId) return;
+    if (!selectedSecretary || !selectedOutfitId) {
+      alert('请先选择秘书和服装');
+      return;
+    }
 
-    const { error } = await supabase
-      .from('user_preferences')
-      .upsert({
+    setSaving(true);
+
+    try {
+      // 首先检查是否已存在配置
+      const { data: existingPrefs, error: fetchError } = await supabase
+        .from('user_preferences')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('查询用户偏好失败:', fetchError);
+        throw fetchError;
+      }
+
+      // 准备保存的数据
+      const prefsData = {
         user_id: userId,
         secretary_avatar_id: selectedSecretary.id,
         secretary_outfit_id: selectedOutfitId,
         secretary_name: selectedSecretary.name,
         secretary_enabled: true,
         updated_at: new Date().toISOString(),
-      });
+      };
 
-    if (error) {
-      console.error('保存秘书配置失败:', error);
-      alert('保存失败，请重试');
-    } else {
+      let saveError;
+
+      if (existingPrefs) {
+        // 如果存在，使用UPDATE
+        const { error } = await supabase
+          .from('user_preferences')
+          .update(prefsData)
+          .eq('user_id', userId);
+        saveError = error;
+      } else {
+        // 如果不存在，使用INSERT
+        const { error } = await supabase
+          .from('user_preferences')
+          .insert({
+            ...prefsData,
+            created_at: new Date().toISOString(),
+          });
+        saveError = error;
+      }
+
+      if (saveError) {
+        console.error('保存秘书配置失败:', saveError);
+        throw saveError;
+      }
+
+      // 保存成功
       alert('保存成功！秘书已启用为桌面宠物');
       // 播放鼓励语
       playSecretaryVoice('encouragement');
-      // 刷新页面以显示桌面宠物
-      window.location.reload();
+      
+      // 延迟刷新页面，让用户听到鼓励语
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error('保存配置时发生错误:', error);
+      alert(`保存失败：${error instanceof Error ? error.message : '未知错误'}，请重试`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -328,9 +376,15 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
                   onClick={handleSaveSelection}
                   className="w-full"
                   size="lg"
+                  disabled={saving}
                 >
-                  保存配置
+                  {saving ? '保存中...' : '保存配置'}
                 </Button>
+                {saving && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    正在保存配置，请稍候...
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
