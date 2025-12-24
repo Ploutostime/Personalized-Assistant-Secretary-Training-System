@@ -1,22 +1,29 @@
 // 语音合成管理工具
 export class VoiceManager {
-  private synth: SpeechSynthesis;
+  private synth: SpeechSynthesis | null;
   private voices: SpeechSynthesisVoice[] = [];
   private currentUtterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
-    this.synth = window.speechSynthesis;
-    this.loadVoices();
+    // 检查浏览器是否支持语音合成
+    this.synth = typeof window !== 'undefined' && window.speechSynthesis ? window.speechSynthesis : null;
+    if (this.synth) {
+      this.loadVoices();
+    }
   }
 
   // 加载可用语音
   private loadVoices() {
+    if (!this.synth) return;
+
     this.voices = this.synth.getVoices();
 
     // 某些浏览器需要异步加载语音
     if (this.voices.length === 0) {
       this.synth.onvoiceschanged = () => {
-        this.voices = this.synth.getVoices();
+        if (this.synth) {
+          this.voices = this.synth.getVoices();
+        }
       };
     }
   }
@@ -46,6 +53,12 @@ export class VoiceManager {
       onError?: (error: SpeechSynthesisErrorEvent) => void;
     }
   ) {
+    // 检查语音合成是否可用
+    if (!this.synth) {
+      console.warn('语音合成不可用');
+      return;
+    }
+
     // 停止当前语音
     this.stop();
 
@@ -77,6 +90,8 @@ export class VoiceManager {
 
   // 停止语音
   stop() {
+    if (!this.synth) return;
+
     if (this.synth.speaking) {
       this.synth.cancel();
     }
@@ -85,6 +100,8 @@ export class VoiceManager {
 
   // 暂停语音
   pause() {
+    if (!this.synth) return;
+
     if (this.synth.speaking && !this.synth.paused) {
       this.synth.pause();
     }
@@ -92,6 +109,8 @@ export class VoiceManager {
 
   // 恢复语音
   resume() {
+    if (!this.synth) return;
+
     if (this.synth.paused) {
       this.synth.resume();
     }
@@ -99,11 +118,13 @@ export class VoiceManager {
 
   // 检查是否正在说话
   isSpeaking(): boolean {
+    if (!this.synth) return false;
     return this.synth.speaking;
   }
 
   // 检查是否暂停
   isPaused(): boolean {
+    if (!this.synth) return false;
     return this.synth.paused;
   }
 
