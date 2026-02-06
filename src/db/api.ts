@@ -681,6 +681,22 @@ export async function getSecretaryPersonalities(): Promise<SecretaryPersonality[
 }
 
 // 获取所有秘书服装
+
+// ==================== Fun Learning Guides ====================
+
+export async function getFunLearningGuides() {
+  const { data, error } = await supabase
+    .from('fun_learning_guides')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('获取趣味学习引导失败:', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+}
+
 export async function getSecretaryOutfits(): Promise<SecretaryOutfit[]> {
   const { data, error } = await supabase
     .from('secretary_outfits')

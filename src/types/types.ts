@@ -409,3 +409,20 @@ export interface ExtendedSecretaryAvatar extends SecretaryAvatar {
   emotional_traits?: Record<string, number> | null;
   interaction_preferences?: Record<string, any> | null;
 }
+
+
+// 趣味学习引导接口
+export interface FunLearningGuide {
+  id: string;
+  question: string;
+  options: string[];
+  correct_answer: string;
+  fun_explanation: string;
+  related_knowledge_title: string;
+  related_knowledge_content: string;
+  video_url: string;
+  video_title: string;
+  video_cover: string;
+  subject: string;
+  created_at: string;
+}

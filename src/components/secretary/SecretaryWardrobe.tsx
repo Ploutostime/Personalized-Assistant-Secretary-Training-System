@@ -106,7 +106,7 @@ export function SecretaryWardrobe({ userId }: SecretaryWardrobeProps) {
           image_url,
           outfit:secretary_outfits(*)
         `)
-        .eq('secretary_avatar_id', selectedSecretary.id);
+        .eq('secretary_avatar_id', selectedSecretary?.id);
 
       if (error) {
         console.error('加载秘书服装失败:', error);

@@ -34,6 +34,7 @@ const navigation = [
   { name: '事务管理', href: '/tasks', icon: ListTodo },
   { name: '时间表', href: '/schedule', icon: Calendar },
   { name: '知识收藏', href: '/knowledge', icon: BookMarked },
+  { name: '趣味探索', href: '/fun-learning', icon: GraduationCap },
   { name: '私人终端', href: '/video-terminal', icon: Video },
   { name: '秘书形象', href: '/secretary', icon: Sparkles },
   { name: '学习统计', href: '/statistics', icon: BarChart3 },

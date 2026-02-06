@@ -8,7 +8,8 @@
     import {
       makeTagger,
       injectedGuiListenerPlugin,
-      injectOnErrorPlugin
+      injectOnErrorPlugin,
+      monitorPlugin
     } from "miaoda-sc-plugin";
 
     const env: ConfigEnv = { command: "serve", mode: "development" };
@@ -18,6 +19,8 @@
 
     export default defineConfig({
       ...userConfig,
+      // 将 Vite 缓存目录设置为项目本地目录，避免在 /workspace/node_modules/ 下创建
+      cacheDir: path.resolve(__dirname, "node_modules/.vite"),
       plugins: [
         makeTagger(),
         injectedGuiListenerPlugin({
@@ -111,7 +114,15 @@
     };
   }
 },
-
+,
+        monitorPlugin(
+          {
+            scriptSrc: 'https://resource-static.cdn.bcebos.com/sentry/browser.sentry.min.js',
+            sentryDsn: 'https://e3c07b90fcb5207f333d50ac24a99d3e@sentry.miaoda.cn/233',
+            environment: 'undefined',
+            appId: 'app-8ajfx1gov18h'
+          }
+        )
       ]
     });
     
