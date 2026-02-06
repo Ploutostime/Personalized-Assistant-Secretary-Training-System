@@ -14,6 +14,7 @@ const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const FunLearningPage = lazy(() => import('./pages/FunLearningPage'));
+const EntrepreneurshipPage = lazy(() => import('./pages/EntrepreneurshipPage'));
 const SecretaryPage = lazy(() => import('./pages/SecretaryPage'));
 
 interface RouteConfig {
@@ -75,6 +76,11 @@ const routes: RouteConfig[] = [
     name: 'FunLearning',
     path: '/fun-learning',
     element: <FunLearningPage />,
+  },
+  {
+    name: 'Entrepreneurship',
+    path: '/entrepreneurship',
+    element: <EntrepreneurshipPage />,
   },
   {
     name: 'Admin',

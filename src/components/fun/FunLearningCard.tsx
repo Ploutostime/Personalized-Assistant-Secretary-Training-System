@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FunLearningGuide } from '@/types/types';
-import { CheckCircle2, XCircle, Lightbulb, Play, ArrowRight, BookOpen } from 'lucide-react';
+import { CheckCircle2, XCircle, Lightbulb, Play, ArrowRight, BookOpen, Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FunLearningCardProps {
@@ -136,6 +138,26 @@ export function FunLearningCard({ guide, onComplete }: FunLearningCardProps) {
                 </div>
               </a>
             </div>
+
+            {/* 创业导师引导 (如果是科技或计算机相关主题) */}
+            {(guide.subject === '计算机科学' || guide.subject === '物理' || guide.subject === '生命科学' || guide.subject === '天文') && (
+              <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 dark:bg-orange-950/20 dark:border-orange-800 space-y-3">
+                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400 font-bold">
+                  <Rocket className="w-5 h-5" />
+                  导师点评：从知识到实践
+                </div>
+                <p className="text-sm text-orange-600/80 dark:text-orange-300/80">
+                  看到这个知识点背后的商机了吗？无论是 AI 还是绿色科技，知识的终点是创造价值。
+                </p>
+                <Button asChild variant="outline" className="w-full border-orange-300 hover:bg-orange-100 dark:border-orange-800 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-400">
+                  <Link to="/entrepreneurship">
+                    查看相关创业赛道推荐
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+
           </div>
         )}
       </CardContent>

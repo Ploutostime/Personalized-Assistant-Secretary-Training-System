@@ -426,3 +426,34 @@ export interface FunLearningGuide {
   subject: string;
   created_at: string;
 }
+
+// 创业赛道接口
+export interface StartupSector {
+  id: string;
+  title: string;
+  description: string;
+  market_trend: string | null;
+  difficulty_level: string | null;
+  potential_value: string | null;
+  icon_name: string | null;
+  tags: string[] | null;
+  created_at: string;
+}
+
+// 创业知识节点接口
+export interface KnowledgeNode {
+  title: string;
+  desc: string;
+  importance?: number;
+}
+
+// 创业知识地图接口
+export interface StartupKnowledgeMap {
+  id: string;
+  sector_id: string;
+  stage_name: string;
+  knowledge_nodes: KnowledgeNode[];
+  order_index: number;
+  created_at: string;
+}
+

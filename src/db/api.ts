@@ -16,6 +16,8 @@ import type {
   SecretaryPersonality,
   SecretaryOutfit,
   SecretaryConfig,
+  StartupSector,
+  StartupKnowledgeMap,
 } from '@/types/types';
 
 // ==================== Profiles ====================
@@ -696,6 +698,38 @@ export async function getFunLearningGuides() {
   }
   return Array.isArray(data) ? data : [];
 }
+
+// ==================== Entrepreneurship (Startup Mentor) ====================
+
+// 获取所有创业赛道
+export async function getStartupSectors(): Promise<StartupSector[]> {
+  const { data, error } = await supabase
+    .from('startup_sectors')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('获取创业赛道失败:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// 获取特定赛道的知识地图
+export async function getStartupKnowledgeMaps(sectorId: string): Promise<StartupKnowledgeMap[]> {
+  const { data, error } = await supabase
+    .from('startup_knowledge_maps')
+    .select('*')
+    .eq('sector_id', sectorId)
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    console.error('获取创业知识地图失败:', error);
+    return [];
+  }
+  return data || [];
+}
+
 
 export async function getSecretaryOutfits(): Promise<SecretaryOutfit[]> {
   const { data, error } = await supabase
