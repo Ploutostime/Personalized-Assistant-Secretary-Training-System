@@ -10,14 +10,12 @@ interface DesktopPetManagerProps {
 interface PetConfig {
   enabled: boolean;
   secretaryAvatarId: string | null;
-  outfitId: string | null;
 }
 
 export function DesktopPetManager({ userId }: DesktopPetManagerProps) {
   const [petConfig, setPetConfig] = useState<PetConfig>({
     enabled: false,
     secretaryAvatarId: null,
-    outfitId: null,
   });
   const [secretary, setSecretary] = useState<SecretaryAvatar | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -27,7 +25,7 @@ export function DesktopPetManager({ userId }: DesktopPetManagerProps) {
     async function loadPetConfig() {
       const { data, error } = await supabase
         .from('user_preferences')
-        .select('secretary_avatar_id, secretary_outfit_id, secretary_enabled')
+        .select('secretary_avatar_id, secretary_enabled')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -40,7 +38,6 @@ export function DesktopPetManager({ userId }: DesktopPetManagerProps) {
         setPetConfig({
           enabled: data.secretary_enabled || false,
           secretaryAvatarId: data.secretary_avatar_id,
-          outfitId: data.secretary_outfit_id,
         });
       }
     }
@@ -48,7 +45,7 @@ export function DesktopPetManager({ userId }: DesktopPetManagerProps) {
     loadPetConfig();
   }, [userId]);
 
-  // 加载秘书信息和立绘
+  // 加载秘书信息和3D形象
   useEffect(() => {
     if (!petConfig.enabled || !petConfig.secretaryAvatarId) {
       return;
@@ -69,26 +66,8 @@ export function DesktopPetManager({ userId }: DesktopPetManagerProps) {
 
       setSecretary(secretaryData);
 
-      // 加载立绘
-      if (petConfig.outfitId) {
-        const { data: imageData, error: imageError } = await supabase
-          .from('secretary_outfit_images')
-          .select('image_url')
-          .eq('secretary_avatar_id', petConfig.secretaryAvatarId)
-          .eq('outfit_id', petConfig.outfitId)
-          .maybeSingle();
-
-        if (imageError || !imageData) {
-          console.error('加载秘书立绘失败:', imageError);
-          // 使用默认头像
-          setImageUrl(secretaryData.avatar_url || '');
-        } else {
-          setImageUrl(imageData.image_url);
-        }
-      } else {
-        // 使用默认头像
-        setImageUrl(secretaryData.avatar_url || '');
-      }
+      // 使用3D形象
+      setImageUrl(secretaryData.avatar_url || '');
     }
 
     loadSecretaryData();

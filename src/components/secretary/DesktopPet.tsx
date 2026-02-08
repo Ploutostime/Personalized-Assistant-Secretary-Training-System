@@ -266,7 +266,7 @@ export function DesktopPet({
               </div>
             )}
 
-            {/* 秘书立绘 */}
+            {/* 秘书3D形象 */}
             <div
               className="relative bg-gradient-to-b from-primary/5 to-secondary/5 cursor-pointer hover:from-primary/10 hover:to-secondary/10 transition-colors"
               onClick={handlePetClick}
@@ -274,8 +274,11 @@ export function DesktopPet({
               <img
                 src={imageUrl}
                 alt={secretaryName}
-                className="w-full h-auto object-contain"
-                style={{ maxHeight: '300px' }}
+                className="w-full h-auto object-cover rounded-b-lg"
+                style={{ 
+                  maxHeight: '300px',
+                  filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
+                }}
               />
             </div>
 
@@ -309,7 +312,10 @@ export function DesktopPet({
             <img
               src={imageUrl}
               alt={secretaryName}
-              className="w-12 h-12 rounded-full object-cover"
+              className="w-12 h-12 rounded-lg object-cover"
+              style={{
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+              }}
             />
             <span className="text-sm text-muted-foreground">已最小化</span>
           </div>

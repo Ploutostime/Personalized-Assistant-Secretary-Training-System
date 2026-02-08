@@ -80,30 +80,10 @@ export function SecretaryAssistant() {
     );
   }
 
-  // 获取形象图标
-  const getAvatarIcon = () => {
-    if (!config.avatar) return '👤';
-    const iconMap: Record<string, string> = {
-      loli: '🌸',
-      oneesan: '💐',
-      uncle: '🎩',
-      boss: '👔',
-      senior_sister: '📚',
-      senior_brother: '⚡',
-    };
-    return iconMap[config.avatar.type] || '👤';
-  };
-
-  // 获取形象图片
-  const getAvatarImage = () => {
+  // 获取3D形象图片
+  const get3DAvatarImage = () => {
     if (!config.avatar || !config.avatar.avatar_url) return null;
     return config.avatar.avatar_url;
-  };
-
-  // 获取全身立绘图片
-  const getFullBodyImage = () => {
-    if (!config.avatar || !config.avatar.full_body_url) return null;
-    return config.avatar.full_body_url;
   };
 
   return (
@@ -125,27 +105,21 @@ export function SecretaryAssistant() {
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
-          {/* 秘书2D形象 */}
+          {/* 秘书3D形象 */}
           <div className="flex-shrink-0">
-            <div className="w-48 h-56 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10 flex items-end justify-center">
-              {getFullBodyImage() ? (
+            <div className="w-48 h-56 rounded-lg overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/10 flex items-center justify-center">
+              {get3DAvatarImage() ? (
                 <img
-                  src={getFullBodyImage()!}
+                  src={get3DAvatarImage()!}
                   alt={config.name}
-                  className="h-full w-auto object-contain object-bottom animate-float"
+                  className="w-full h-full object-cover animate-float"
                   style={{
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
                   }}
                 />
-              ) : getAvatarImage() ? (
-                <img
-                  src={getAvatarImage()!}
-                  alt={config.name}
-                  className="w-32 h-32 rounded-full object-cover animate-float"
-                />
               ) : (
                 <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center text-6xl">
-                  {getAvatarIcon()}
+                  <Sparkles className="w-16 h-16 text-primary" />
                 </div>
               )}
             </div>
