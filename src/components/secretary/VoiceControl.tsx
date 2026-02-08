@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import { Volume2, VolumeX, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   voiceManager,
@@ -21,13 +21,11 @@ export function VoiceControl({
 }: VoiceControlProps) {
   const [isEnabled, setIsEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   // 检查语音状态
   useEffect(() => {
     const checkStatus = setInterval(() => {
       setIsSpeaking(voiceManager.isSpeaking());
-      setIsPaused(voiceManager.isPaused());
     }, 100);
 
     return () => clearInterval(checkStatus);
@@ -49,19 +47,8 @@ export function VoiceControl({
     const greeting = getRandomPhrase(config.greetings);
 
     voiceManager.speak(greeting, {
-      pitch: config.pitch,
-      rate: config.rate,
-      volume: config.volume,
+      secretaryType: secretaryType,
     });
-  };
-
-  // 暂停/恢复
-  const togglePause = () => {
-    if (isPaused) {
-      voiceManager.resume();
-    } else {
-      voiceManager.pause();
-    }
   };
 
   // 停止
@@ -87,7 +74,7 @@ export function VoiceControl({
       </Button>
 
       {/* 播放问候语 */}
-      {isEnabled && (
+      {isEnabled && !isSpeaking && (
         <Button
           variant="outline"
           size="sm"
@@ -97,23 +84,6 @@ export function VoiceControl({
         >
           <Play className="w-4 h-4" />
           {showText && <span className="ml-2">问候</span>}
-        </Button>
-      )}
-
-      {/* 暂停/恢复 */}
-      {isEnabled && isSpeaking && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={togglePause}
-          title={isPaused ? '恢复' : '暂停'}
-        >
-          {isPaused ? (
-            <Play className="w-4 h-4" />
-          ) : (
-            <Pause className="w-4 h-4" />
-          )}
-          {showText && <span className="ml-2">{isPaused ? '恢复' : '暂停'}</span>}
         </Button>
       )}
 

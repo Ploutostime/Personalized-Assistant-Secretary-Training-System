@@ -142,9 +142,7 @@ export default function FloatingSecretary2D({ secretary, userId, onClose }: Floa
 
     if (voiceEnabled) {
       voiceManager.speak(phrase, {
-        pitch: config.pitch,
-        rate: config.rate,
-        volume: config.volume,
+        secretaryType: secretary.type,
       });
     }
   };

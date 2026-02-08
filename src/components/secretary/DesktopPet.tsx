@@ -133,9 +133,7 @@ export function DesktopPet({
     // 播放语音
     if (voiceEnabled) {
       voiceManager.speak(greeting, {
-        pitch: config.pitch,
-        rate: config.rate,
-        volume: config.volume,
+        secretaryType: secretaryType,
       });
     }
   };
@@ -149,9 +147,7 @@ export function DesktopPet({
 
     if (voiceEnabled) {
       voiceManager.speak(encouragement, {
-        pitch: config.pitch,
-        rate: config.rate,
-        volume: config.volume,
+        secretaryType: secretaryType,
       });
     }
   };
@@ -165,9 +161,7 @@ export function DesktopPet({
 
     if (voiceEnabled) {
       voiceManager.speak(reminder, {
-        pitch: config.pitch,
-        rate: config.rate,
-        volume: config.volume,
+        secretaryType: secretaryType,
       });
     }
   };
