@@ -54,6 +54,23 @@ Deno.serve(async (req) => {
       ...customVoiceConfig,
     };
 
+    // 根据性别优化声音效果器参数
+    // 女性角色：增强音色的柔和度和魅力
+    // 男性角色：增强音色的深度和磁性
+    const voiceModify = secretaryType.match(/loli|oneesan|senior_sister|elf|witch|angel|princess|artist/)
+      ? {
+          // 女性角色：提升音色明亮度，增加魅力
+          pitch: 10,
+          intensity: 5,
+          timbre: 15,
+        }
+      : {
+          // 男性角色：降低音高，增加磁性和深度
+          pitch: -15,
+          intensity: 10,
+          timbre: -20,
+        };
+
     // 调用MiniMax TTS API
     const ttsResponse = await fetch(
       'https://app-8ajfx1gov18h-api-DLEO7Bj0lORa-gateway.appmiaoda.com/v1/t2a_v2',
@@ -74,6 +91,7 @@ Deno.serve(async (req) => {
             pitch: voiceConfig.pitch,
             emotion: voiceConfig.emotion,
           },
+          voice_modify: voiceModify,
           audio_setting: {
             sample_rate: 32000,
             bitrate: 128000,
