@@ -25,11 +25,10 @@ import {
   updateUserPreferences,
   getSecretaryAvatars,
   getSecretaryPersonalities,
-  getSecretaryOutfits,
   getUserSecretaryConfig,
   updateSecretaryConfig,
 } from '@/db/api';
-import type { ScheduleSettings, MajorTag, UserPreferences, SecretaryAvatar, SecretaryPersonality, SecretaryOutfit, SecretaryConfig } from '@/types/types';
+import type { ScheduleSettings, MajorTag, UserPreferences, SecretaryAvatar, SecretaryPersonality, SecretaryConfig } from '@/types/types';
 import { Settings as SettingsIcon, Clock, Save, User, Video, GraduationCap, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { SecretaryCard } from '@/components/SecretaryCard';
@@ -44,11 +43,9 @@ export default function SettingsPage() {
   // 秘书定制相关状态
   const [avatars, setAvatars] = useState<SecretaryAvatar[]>([]);
   const [personalities, setPersonalities] = useState<SecretaryPersonality[]>([]);
-  const [outfits, setOutfits] = useState<SecretaryOutfit[]>([]);
   const [secretaryConfig, setSecretaryConfig] = useState<SecretaryConfig | null>(null);
   const [selectedAvatarId, setSelectedAvatarId] = useState<string>('');
   const [selectedPersonalityId, setSelectedPersonalityId] = useState<string>('');
-  const [selectedOutfitId, setSelectedOutfitId] = useState<string>('');
   const [secretaryName, setSecretaryName] = useState('小秘');
   const [secretaryEnabled, setSecretaryEnabled] = useState(true);
 
@@ -81,14 +78,13 @@ export default function SettingsPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [scheduleData, profileInfo, tags, preferences, avatarList, personalityList, outfitList, config] = await Promise.all([
+      const [scheduleData, profileInfo, tags, preferences, avatarList, personalityList, config] = await Promise.all([
         getScheduleSettings(user.id),
         getProfile(user.id),
         getMajorTags(),
         getUserPreferences(user.id),
         getSecretaryAvatars(),
         getSecretaryPersonalities(),
-        getSecretaryOutfits(),
         getUserSecretaryConfig(user.id),
       ]);
 
@@ -124,13 +120,11 @@ export default function SettingsPage() {
       // 设置秘书数据
       setAvatars(avatarList);
       setPersonalities(personalityList);
-      setOutfits(outfitList);
       
       if (config) {
         setSecretaryConfig(config);
         setSelectedAvatarId(config.avatar?.id || '');
         setSelectedPersonalityId(config.personality?.id || '');
-        setSelectedOutfitId(config.outfit?.id || '');
         setSecretaryName(config.name);
         setSecretaryEnabled(config.enabled);
       }
@@ -228,7 +222,6 @@ export default function SettingsPage() {
     const success = await updateSecretaryConfig(user.id, {
       avatarId: selectedAvatarId,
       personalityId: selectedPersonalityId,
-      outfitId: selectedOutfitId,
       name: secretaryName,
       enabled: secretaryEnabled,
     });
@@ -526,10 +519,9 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <Label>选择形象</Label>
               <Tabs defaultValue="avatar" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="avatar">形象</TabsTrigger>
                   <TabsTrigger value="personality">性格</TabsTrigger>
-                  <TabsTrigger value="outfit">服装</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="avatar" className="space-y-3 mt-4">
@@ -555,20 +547,6 @@ export default function SettingsPage() {
                         type="personality"
                         selected={selectedPersonalityId === personality.id}
                         onClick={() => setSelectedPersonalityId(personality.id)}
-                      />
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="outfit" className="space-y-3 mt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {outfits.map((outfit) => (
-                      <SecretaryCard
-                        key={outfit.id}
-                        item={outfit}
-                        type="outfit"
-                        selected={selectedOutfitId === outfit.id}
-                        onClick={() => setSelectedOutfitId(outfit.id)}
                       />
                     ))}
                   </div>

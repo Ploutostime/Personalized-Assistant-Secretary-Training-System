@@ -14,7 +14,6 @@ import type {
   UserPreferences,
   SecretaryAvatar,
   SecretaryPersonality,
-  SecretaryOutfit,
   SecretaryConfig,
   StartupSector,
   StartupKnowledgeMap,
@@ -731,19 +730,6 @@ export async function getStartupKnowledgeMaps(sectorId: string): Promise<Startup
 }
 
 
-export async function getSecretaryOutfits(): Promise<SecretaryOutfit[]> {
-  const { data, error } = await supabase
-    .from('secretary_outfits')
-    .select('*')
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('获取秘书服装失败:', error);
-    return [];
-  }
-  return Array.isArray(data) ? data : [];
-}
-
 // 获取用户的秘书配置
 export async function getUserSecretaryConfig(userId: string): Promise<SecretaryConfig | null> {
   // 获取用户偏好
@@ -774,26 +760,13 @@ export async function getUserSecretaryConfig(userId: string): Promise<SecretaryC
     personality = data;
   }
 
-  // 获取秘书服装
-  let outfit: SecretaryOutfit | null = null;
-  if (preferences.secretary_outfit_id) {
-    const { data } = await supabase
-      .from('secretary_outfits')
-      .select('*')
-      .eq('id', preferences.secretary_outfit_id)
-      .maybeSingle();
-    outfit = data;
-  }
-
   return {
     avatar,
     personality,
-    outfit,
     name: preferences.secretary_name || '小秘',
     enabled: preferences.secretary_enabled,
     avatar_id: preferences.secretary_avatar_id || undefined,
     personality_id: preferences.secretary_personality_id || undefined,
-    outfit_id: preferences.secretary_outfit_id || undefined,
   };
 }
 
@@ -803,7 +776,6 @@ export async function updateSecretaryConfig(
   config: {
     avatarId?: string;
     personalityId?: string;
-    outfitId?: string;
     name?: string;
     enabled?: boolean;
   }
@@ -815,9 +787,6 @@ export async function updateSecretaryConfig(
   }
   if (config.personalityId !== undefined) {
     updates.secretary_personality_id = config.personalityId || null;
-  }
-  if (config.outfitId !== undefined) {
-    updates.secretary_outfit_id = config.outfitId || null;
   }
   if (config.name !== undefined) {
     updates.secretary_name = config.name;

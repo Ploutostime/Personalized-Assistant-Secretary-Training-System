@@ -1,11 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react';
-import type { SecretaryAvatar, SecretaryPersonality, SecretaryOutfit } from '@/types/types';
+import type { SecretaryAvatar, SecretaryPersonality } from '@/types/types';
 
 interface SecretaryCardProps {
-  item: SecretaryAvatar | SecretaryPersonality | SecretaryOutfit;
-  type: 'avatar' | 'personality' | 'outfit';
+  item: SecretaryAvatar | SecretaryPersonality;
+  type: 'avatar' | 'personality';
   selected: boolean;
   onClick: () => void;
 }
@@ -113,20 +113,14 @@ export function SecretaryCard({ item, type, selected, onClick }: SecretaryCardPr
     if (type === 'avatar') {
       return avatarTypeMap[(item as SecretaryAvatar).type] || item.name;
     }
-    if (type === 'personality') {
-      return personalityTypeMap[(item as SecretaryPersonality).type] || item.name;
-    }
-    return outfitTypeMap[(item as SecretaryOutfit).type] || item.name;
+    return personalityTypeMap[(item as SecretaryPersonality).type] || item.name;
   };
 
   const getTypeIcon = () => {
     if (type === 'avatar') {
       return avatarTypeIcon[(item as SecretaryAvatar).type] || '👤';
     }
-    if (type === 'personality') {
-      return personalityTypeIcon[(item as SecretaryPersonality).type] || '😊';
-    }
-    return outfitTypeIcon[(item as SecretaryOutfit).type] || '👔';
+    return personalityTypeIcon[(item as SecretaryPersonality).type] || '😊';
   };
 
   // 获取形象图片

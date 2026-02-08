@@ -154,7 +154,6 @@ export interface UserPreferences {
   daily_recommendation_count: number;
   secretary_avatar_id: string | null;
   secretary_personality_id: string | null;
-  secretary_outfit_id: string | null;
   secretary_name: string | null;
   secretary_enabled: boolean;
   created_at: string;
@@ -207,55 +206,6 @@ export interface AnimationConfig {
 // 秘书性格类型
 export type SecretaryPersonalityType = 'gentle' | 'strict' | 'lively' | 'calm' | 'motivating';
 
-// 秘书服装类型
-export type SecretaryOutfitType = 
-  // 基础系列
-  | 'campus'      // 校园装
-  | 'business'    // 商务装
-  | 'casual'      // 休闲装
-  | 'formal'      // 正装
-  | 'special'     // 特殊装
-  // 运动系列
-  | 'yoga'        // 瑜伽服
-  | 'swimsuit'    // 泳衣
-  | 'bikini'      // 比基尼
-  | 'baseball'    // 棒球装
-  | 'tennis'      // 网球装
-  | 'fitness'     // 健身装
-  | 'running'     // 跑步装
-  | 'basketball'  // 篮球装
-  // 特殊系列
-  | 'lingerie'    // 情趣内衣
-  | 'pajamas'     // 睡衣
-  | 'kimono'      // 和服
-  | 'qipao'       // 旗袍
-  | 'bunny'       // 兔女郎装
-  | 'gothic'      // 哥特装
-  | 'lolita'      // 洛丽塔装
-  // 职业系列
-  | 'nurse'       // 护士装
-  | 'maid'        // 女仆装
-  | 'office_lady' // OL装
-  | 'teacher'     // 教师装
-  | 'police'      // 警察装
-  | 'stewardess'  // 空姐装
-  | 'secretary'   // 秘书装
-  // 休闲系列
-  | 'home_wear'   // 居家服
-  | 'sports_casual' // 运动休闲装
-  | 'dress'       // 连衣裙
-  | 'sundress'    // 夏日连衣裙
-  | 'sweater'     // 毛衣装
-  // 古风系列
-  | 'hanfu'       // 汉服
-  | 'tang_suit'   // 唐装
-  | 'palace'      // 宫装
-  // 奇幻系列
-  | 'elf'         // 精灵装
-  | 'knight'      // 骑士装
-  | 'witch'       // 女巫装
-  | 'angel'       // 天使装;
-
 // 秘书形象接口
 export interface SecretaryAvatar {
   id: string;
@@ -286,37 +236,14 @@ export interface SecretaryPersonality {
   created_at: string;
 }
 
-// 秘书服装接口
-export interface SecretaryOutfit {
-  id: string;
-  name: string;
-  type: SecretaryOutfitType;
-  description: string | null;
-  outfit_url: string | null;
-  suitable_avatars: string[] | null;
-  created_at: string;
-}
-
-// 秘书服装立绘接口（秘书穿着特定服装的立绘）
-export interface SecretaryOutfitImage {
-  id: string;
-  secretary_avatar_id: string;
-  outfit_id: string;
-  image_url: string;
-  created_at: string;
-}
-
 // 秘书配置接口（用于前端展示）
 export interface SecretaryConfig {
   avatar: SecretaryAvatar | null;
   personality: SecretaryPersonality | null;
-  outfit: SecretaryOutfit | null;
   name: string;
   enabled: boolean;
   avatar_id?: string;
   personality_id?: string;
-  outfit_id?: string;
-  current_outfit_image_url?: string | null; // 当前服装的立绘URL
 }
 
 // 情绪类型

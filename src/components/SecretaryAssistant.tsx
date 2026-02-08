@@ -168,11 +168,6 @@ export function SecretaryAssistant() {
                     {config.personality.name}
                   </span>
                 )}
-                {config.outfit && (
-                  <span className="px-2 py-1 bg-background/60 rounded">
-                    {config.outfit.name}
-                  </span>
-                )}
               </div>
             </div>
 
