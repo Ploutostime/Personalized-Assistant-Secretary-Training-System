@@ -144,6 +144,35 @@ export default function LoginPage() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? '登录中...' : '登录'}
                   </Button>
+                  
+                  {/* 测试账号提示 */}
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-muted">
+                    <p className="text-xs text-muted-foreground text-center mb-2">
+                      💡 测试账号信息
+                    </p>
+                    <div className="text-xs space-y-1">
+                      <p className="text-center">
+                        <span className="font-medium">用户名：</span>
+                        <code className="bg-muted px-2 py-0.5 rounded">ploutos</code>
+                      </p>
+                      <p className="text-center">
+                        <span className="font-medium">密码：</span>
+                        <code className="bg-muted px-2 py-0.5 rounded">123456</code>
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={() => {
+                        setLoginUsername('ploutos');
+                        setLoginPassword('123456');
+                      }}
+                    >
+                      快速填充测试账号
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
 
