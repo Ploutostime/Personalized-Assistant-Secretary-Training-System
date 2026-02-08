@@ -11,10 +11,12 @@ import {
   UserCog,
   Database,
   Activity,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
-import { getAllUsers, getSystemStats, updateUserRole } from '@/db/api';
+import { getAllUsers, getSystemStats, updateUserRole, getSecretaryAvatars } from '@/db/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -32,6 +34,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/db/supabase';
+import { toast as sonnerToast } from 'sonner';
+import type { SecretaryAvatar } from '@/types/types';
 
 interface User {
   id: string;
@@ -47,6 +52,75 @@ interface SystemStats {
   knowledgeCount: number;
 }
 
+// 秘书形象列表组件
+function SecretaryAvatarList({ 
+  onGenerateSingle, 
+  generating 
+}: { 
+  onGenerateSingle: (id: string, name: string) => void;
+  generating: boolean;
+}) {
+  const [secretaries, setSecretaries] = useState<SecretaryAvatar[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSecretaries();
+  }, []);
+
+  const loadSecretaries = async () => {
+    try {
+      const data = await getSecretaryAvatars();
+      setSecretaries(data);
+    } catch (error) {
+      console.error('加载秘书列表失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Skeleton className="h-96" />;
+  }
+
+  return (
+    <div className="space-y-3">
+      <h3 className="font-semibold">秘书列表</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {secretaries.map((secretary) => (
+          <div 
+            key={secretary.id}
+            className="p-4 border rounded-lg space-y-3 hover:shadow-md transition-shadow"
+          >
+            {secretary.avatar_url && (
+              <img 
+                src={secretary.avatar_url} 
+                alt={secretary.name}
+                className="w-full aspect-[3/4] object-cover rounded-lg"
+              />
+            )}
+            <div>
+              <h4 className="font-semibold">{secretary.name}</h4>
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {secretary.description}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => onGenerateSingle(secretary.id, secretary.name)}
+              disabled={generating}
+            >
+              <Sparkles className="mr-2 h-3 w-3" />
+              重新生成
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const navigate = useNavigate();
   const { isAdmin: isAdminUser, loading: adminLoading } = useAdmin();
@@ -60,6 +134,8 @@ export default function AdminPage() {
     knowledgeCount: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState('');
 
   useEffect(() => {
     // 如果不是管理员，重定向到首页
@@ -118,6 +194,74 @@ export default function AdminPage() {
         description: '无法更新用户角色',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleGenerateAll3DAvatars = async () => {
+    if (!confirm('确定要为所有15个秘书生成3D形象吗？这可能需要几分钟时间。')) {
+      return;
+    }
+
+    setGenerating(true);
+    setGenerationProgress('正在批量生成3D形象...');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-secretary-3d-avatar', {
+        body: {},
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        const successCount = data.results.filter((r: any) => r.success).length;
+        const failedCount = data.results.filter((r: any) => !r.success).length;
+        
+        sonnerToast.success(`批量生成完成！成功: ${successCount} 个，失败: ${failedCount} 个`);
+        
+        // 显示详细结果
+        console.log('生成结果:', data.results);
+      } else {
+        throw new Error(data.error || '生成失败');
+      }
+    } catch (error: any) {
+      console.error('批量生成3D形象失败:', error);
+      sonnerToast.error(`生成失败: ${error.message}`);
+    } finally {
+      setGenerating(false);
+      setGenerationProgress('');
+    }
+  };
+
+  const handleGenerateSingle3DAvatar = async (secretaryId: string, secretaryName: string) => {
+    if (!confirm(`确定要为 ${secretaryName} 生成3D形象吗？`)) {
+      return;
+    }
+
+    setGenerating(true);
+    setGenerationProgress(`正在为 ${secretaryName} 生成3D形象...`);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-secretary-3d-avatar', {
+        body: { secretaryId },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        sonnerToast.success(data.message);
+      } else {
+        throw new Error(data.error || '生成失败');
+      }
+    } catch (error: any) {
+      console.error('生成3D形象失败:', error);
+      sonnerToast.error(`生成失败: ${error.message}`);
+    } finally {
+      setGenerating(false);
+      setGenerationProgress('');
     }
   };
 
@@ -219,6 +363,10 @@ export default function AdminPage() {
             <UserCog className="w-4 h-4" />
             用户管理
           </TabsTrigger>
+          <TabsTrigger value="secretary" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            秘书形象管理
+          </TabsTrigger>
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             数据统计
@@ -284,6 +432,56 @@ export default function AdminPage() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 秘书形象管理标签页 */}
+        <TabsContent value="secretary" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>秘书3D形象生成</CardTitle>
+              <CardDescription>
+                使用AI为所有秘书生成专属的3D形象
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                <div>
+                  <h3 className="font-semibold">批量生成所有秘书的3D形象</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    将为系统中的15个秘书形象生成对应的3D图片，根据各自的性格特点定制
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleGenerateAll3DAvatars}
+                  disabled={generating}
+                  size="lg"
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      生成中...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      批量生成
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {generating && generationProgress && (
+                <div className="p-4 border rounded-lg bg-primary/5">
+                  <p className="text-sm font-medium">{generationProgress}</p>
+                </div>
+              )}
+
+              <SecretaryAvatarList 
+                onGenerateSingle={handleGenerateSingle3DAvatar}
+                generating={generating}
+              />
             </CardContent>
           </Card>
         </TabsContent>
