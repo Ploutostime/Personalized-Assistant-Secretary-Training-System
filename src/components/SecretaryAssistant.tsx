@@ -159,7 +159,7 @@ export function SecretaryAssistant() {
         {/* AI对话弹窗 */}
         {showChatDialog && user && (
           <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
-            <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0">
+            <DialogContent className="w-auto h-auto max-w-none max-h-none flex flex-col p-0 bg-transparent border-0 shadow-none [&_[data-slot=dialog-default-close]]:hidden">
               <SecretaryChat
                 secretaryConfig={{
                   name: config.name,
