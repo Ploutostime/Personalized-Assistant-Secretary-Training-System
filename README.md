@@ -183,7 +183,7 @@ npm -v    # 10.8.2
 npm install
 
 # Step 5: 启动开发服务器
-npm run dev -- --host 127.0.0.1
+npx vite --host 127.0.0.1
 ```
 
 ### 数据库配置
