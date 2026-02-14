@@ -327,7 +327,35 @@ export async function deleteStudySession(sessionId: string): Promise<boolean> {
   return true;
 }
 
-// ==================== Schedule Settings ====================
+import { generateSchedule, DailySchedule } from '../utils/scheduler';
+
+// ... (existing imports)
+
+// ==================== Schedule Generation ====================
+
+export async function generateAndGetSchedule(userId: string, startDate: Date = new Date()): Promise<DailySchedule[]> {
+  const tasks = await getTasks(userId, { status: 'pending' });
+  const settings = await getScheduleSettings(userId);
+  
+  if (!settings) {
+    // 如果没有设置，提供默认设置
+    const defaultSettings: ScheduleSettings = {
+      id: '',
+      user_id: userId,
+      daily_study_goal_hours: 6,
+      preferred_start_time: '08:00',
+      preferred_end_time: '22:00',
+      break_duration_minutes: 15,
+      auto_schedule_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    return generateSchedule(tasks, defaultSettings, startDate);
+  }
+
+  return generateSchedule(tasks, settings, startDate);
+}
+
 
 export async function getScheduleSettings(userId: string): Promise<ScheduleSettings | null> {
   const { data, error } = await supabase

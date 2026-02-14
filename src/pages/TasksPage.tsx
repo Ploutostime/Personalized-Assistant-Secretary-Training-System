@@ -24,10 +24,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { getTasks, createTask, updateTask, deleteTask } from '@/db/api';
 import type { Task, TaskType, PriorityLevel, TaskStatus } from '@/types/types';
-import { Plus, Clock, Edit, Trash2, Filter } from 'lucide-react';
+import { Plus, Clock, Edit, Trash2, Filter, CheckCircle2, Circle } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,9 +57,7 @@ const priorityOptions: { value: PriorityLevel; label: string }[] = [
 
 const statusOptions: { value: TaskStatus; label: string }[] = [
   { value: 'pending', label: '待办' },
-  { value: 'in_progress', label: '进行中' },
   { value: 'completed', label: '已完成' },
-  { value: 'cancelled', label: '已取消' },
 ];
 
 const priorityColors = {
@@ -86,6 +85,8 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -98,18 +99,7 @@ export default function TasksPage() {
   });
 
   const getAllowedStatuses = (current: TaskStatus): TaskStatus[] => {
-    switch (current) {
-      case 'pending':
-        return ['pending', 'in_progress', 'cancelled'];
-      case 'in_progress':
-        return ['in_progress', 'completed', 'cancelled'];
-      case 'completed':
-        return ['completed'];
-      case 'cancelled':
-        return ['cancelled'];
-      default:
-        return [current];
-    }
+    return ['pending', 'completed'];
   };
 
   const buildStatusTransitionUpdates = (task: Task, newStatus: TaskStatus): Partial<Task> => {
@@ -210,8 +200,8 @@ export default function TasksPage() {
     e.preventDefault();
     if (!user) return;
 
-    if (!formData.title.trim()) {
-      toast.error('请输入任务标题');
+    if (formData.deadline && new Date(formData.deadline).getTime() < Date.now()) {
+      toast.error('截止时间不能早于当前时间');
       return;
     }
 
@@ -275,24 +265,17 @@ export default function TasksPage() {
     setTaskToDelete(null);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const allowed = getAllowedStatuses(task.status);
-    if (!allowed.includes(newStatus)) {
-      toast.error('不允许的状态变更');
-      return;
-    }
-
-    const updates = buildStatusTransitionUpdates(task, newStatus);
-    const success = await updateTask(taskId, updates);
+  const handleCompleteConfirm = async () => {
+    if (!taskToComplete) return;
+    const success = await deleteTask(taskToComplete);
     if (success) {
-      toast.success('状态更新成功');
+      toast.success('任务已完成并删除');
       loadTasks();
     } else {
-      toast.error('状态更新失败');
+      toast.error('操作失败');
     }
+    setCompleteDialogOpen(false);
+    setTaskToComplete(null);
   };
 
   if (loading) {
@@ -390,28 +373,38 @@ export default function TasksPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status">状态</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: TaskStatus) => setFormData({ ...formData, status: value })}
-                    disabled={!editingTask}
-                  >
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(editingTask ? statusOptions.filter(o => getAllowedStatuses(editingTask.status).includes(o.value)) : statusOptions.filter(o => o.value === 'pending')).map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {editingTask ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="status">状态</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value: TaskStatus) => setFormData({ ...formData, status: value })}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label>初始状态</Label>
+                    <div className="h-10 flex items-center px-3 border rounded-md bg-muted text-muted-foreground text-sm">
+                      待办
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="estimated_hours">预计时长（小时）</Label>
+                  <Label htmlFor="estimated_hours">
+                    {['exam', 'competition', 'study'].includes(formData.task_type) ? '每日期望投入（小时/可选）' : '预计总时长（小时）*'}
+                  </Label>
                   <Input
                     id="estimated_hours"
                     type="number"
@@ -419,7 +412,7 @@ export default function TasksPage() {
                     min="0"
                     value={formData.estimated_hours}
                     onChange={(e) => setFormData({ ...formData, estimated_hours: e.target.value })}
-                    placeholder="0.0"
+                    placeholder={['exam', 'competition', 'study'].includes(formData.task_type) ? '不填则由系统自动分配' : '0.0'}
                   />
                 </div>
               </div>
@@ -429,6 +422,7 @@ export default function TasksPage() {
                 <Input
                   id="deadline"
                   type="datetime-local"
+                  min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   value={formData.deadline}
                   onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                 />
@@ -500,81 +494,110 @@ export default function TasksPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {filteredTasks.map((task) => (
-            <Card key={task.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{task.title}</h3>
-                      {isTaskOverdue(task) && (
-                        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                          逾期
-                        </Badge>
-                      )}
-                      <Badge variant="outline">{taskTypeOptions.find(t => t.value === task.task_type)?.label}</Badge>
-                      <Badge className={priorityColors[task.priority]}>
-                        {priorityOptions.find(p => p.value === task.priority)?.label}
-                      </Badge>
+          <AnimatePresence mode="popLayout">
+            {filteredTasks.map((task) => (
+              <motion.div
+                key={task.id}
+                layout
+                exit={{ 
+                  opacity: 0, 
+                  x: 50, 
+                  scale: 0.9, 
+                  filter: 'blur(8px)',
+                  transition: { duration: 0.3, ease: "easeOut" } 
+                }}
+              >
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold">{task.title}</h3>
+                          {isTaskOverdue(task) && (
+                            <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                              逾期
+                            </Badge>
+                          )}
+                          <Badge variant="outline">{taskTypeOptions.find(t => t.value === task.task_type)?.label}</Badge>
+                          <Badge className={priorityColors[task.priority]}>
+                            {priorityOptions.find(p => p.value === task.priority)?.label}
+                          </Badge>
+                        </div>
+
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                          {task.deadline && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              截止：{format(new Date(task.deadline), 'yyyy-MM-dd HH:mm', { locale: zhCN })}
+                            </span>
+                          )}
+                          {task.estimated_hours && !['exam', 'competition', 'study'].includes(task.task_type) && (
+                            <span>预计：{task.estimated_hours} 小时</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          onClick={() => {
+                            setTaskToComplete(task.id);
+                            setCompleteDialogOpen(true);
+                          }}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+
+                        <Button variant="outline" size="icon" onClick={() => handleOpenDialog(task)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setTaskToDelete(task.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-
-                    {task.description && (
-                      <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
-                    )}
-
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      {task.deadline && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          截止：{format(new Date(task.deadline), 'yyyy-MM-dd HH:mm', { locale: zhCN })}
-                        </span>
-                      )}
-                      {task.estimated_hours && (
-                        <span>预计：{task.estimated_hours} 小时</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <Select
-                      value={task.status}
-                      onValueChange={(value: TaskStatus) => handleStatusChange(task.id, value)}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions
-                          .filter(option => getAllowedStatuses(task.status).includes(option.value))
-                          .map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Button variant="outline" size="icon" onClick={() => handleOpenDialog(task)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setTaskToDelete(task.id);
-                        setDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
+
+      {/* 完成确认弹窗 */}
+      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认完成任务</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定已完成该任务吗？确认后任务将被标记为完成并从列表中移除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCompleteConfirm}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              确认完成
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
