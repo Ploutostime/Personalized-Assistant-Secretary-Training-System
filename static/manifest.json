@@ -1,0 +1,24 @@
+{
+  "name": "农业之声",
+  "short_name": "农业之声",
+  "description": "关注农业科技发展，传播现代农业知识",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2E7D32",
+  "theme_color": "#2E7D32",
+  "icons": [
+    {
+      "src": "/static/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["agriculture", "education", "technology"],
+  "lang": "zh-CN",
+  "orientation": "portrait"
+}
