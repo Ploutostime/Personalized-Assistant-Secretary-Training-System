@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="智学秘伴 - 用户注册">
+    <title>智学秘伴 | 用户注册</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-image: url('../images/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.8) 0%, rgba(27, 94, 32, 0.8) 100%);
+            z-index: -1;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .back-home a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-home a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 35px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #FF9800, #F57C00);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #FF9800;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .welcome-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .input1 {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input1::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input1:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #FF9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .validation-message {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            padding-left: 5px;
+            display: none;
+        }
+
+        .valid {
+            color: #8BC34A;
+            display: block;
+        }
+
+        .invalid {
+            color: #FF5252;
+            display: block;
+        }
+
+        .terms {
+            margin: 25px 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+
+        .terms input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: #FF9800;
+        }
+
+        .terms a {
+            color: #FF9800;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+        }
+
+        .button1 {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            margin-bottom: 25px;
+        }
+
+        .button1:hover {
+            background: linear-gradient(135deg, #FB8C00 0%, #EF6C00 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .button1:active {
+            transform: translateY(0);
+        }
+
+        .button1:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9800, #4CAF50);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .extra {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .extra a {
+            color: #FF9800;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .extra a:hover {
+            color: #FFB74D;
+            text-decoration: underline;
+        }
+
+        .register-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            color: #C8E6C9;
+            border: 1px solid #4CAF50;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            color: #FFCDD2;
+            border: 1px solid #F44336;
+        }
+
+        .password-requirements {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .password-requirements h4 {
+            margin-bottom: 10px;
+            color: #FF9800;
+            font-size: 0.9rem;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .requirement i {
+            font-size: 0.8rem;
+            width: 16px;
+        }
+
+        .requirement.valid i {
+            color: #8BC34A;
+        }
+
+        .requirement.invalid i {
+            color: #FF5252;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 580px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                margin: 20px;
+                padding: 30px 25px;
+            }
+            
+            .back-home {
+                top: 10px;
+                left: 10px;
+            }
+            
+            h2 {
+                font-size: 1.6rem;
+            }
+            
+            .input1 {
+                padding: 14px 20px 14px 45px;
+            }
+            
+            .button1 {
+                padding: 14px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding-top: 40px;
+            }
+            
+            .register-container {
+                margin-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="back-home">
+        <a href="./index.html">
+            <i class="fas fa-arrow-left"></i>
+            返回首页
+        </a>
+    </div>
+
+    <div class="register-container">
+        <div class="logo-area">
+            <div class="logo">
+                <i class="fas fa-seedling logo-icon"></i>
+                <span class="logo-text">智学秘伴</span>
+            </div>
+            <p class="welcome-text">加入我们，探索学习未来</p>
+        </div>
+
+        <h2>用户注册</h2>
+        
+        <div id="registerMessage" class="register-message"></div>
+        
+        <div class="form-row">
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="firstName" class="input1" placeholder="名字" autocomplete="given-name">
+                <div id="firstNameMsg" class="validation-message"></div>
+            </div>
+            
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="lastName" class="input1" placeholder="姓氏" autocomplete="family-name">
+                <div id="lastNameMsg" class="validation-message"></div>
+            </div>
+        </div>
+        
+        <div class="input-group full-width">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" class="input1" placeholder="邮箱地址" autocomplete="email">
+            <div id="emailMsg" class="validation-message"></div>
+        </div>
+        
+        <div class="input-group full-width">
+            <i class="fas fa-phone input-icon"></i>
+            <input type="tel" id="phone" class="input1" placeholder="手机号码 (可选)" autocomplete="tel">
+            <div id="phoneMsg" class="validation-message"></div>
+        </div>
+        
+        <div class="input-group full-width">
+            <i class="fas fa-user-circle input-icon"></i>
+            <input type="text" id="username" class="input1" placeholder="用户名" autocomplete="username">
+            <div id="usernameMsg" class="validation-message"></div>
+        </div>
+        
+        <div class="input-group full-width">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" class="input1" placeholder="密码" autocomplete="new-password">
+            <button type="button" class="password-toggle" id="togglePassword">
+                <i class="fas fa-eye"></i>
+            </button>
+            <div id="passwordMsg" class="validation-message"></div>
+            <div class="progress-bar">
+                <div class="progress" id="passwordStrengthBar"></div>
+            </div>
+            <div class="password-strength" id="passwordStrengthText">密码强度: 弱</div>
+            
+            <div class="password-requirements">
+                <h4>密码要求:</h4>
+                <div class="requirement" id="reqLength">
+                    <i class="fas fa-circle"></i>
+                    <span>至少8个字符</span>
+                </div>
+                <div class="requirement" id="reqLowercase">
+                    <i class="fas fa-circle"></i>
+                    <span>至少1个小写字母</span>
+                </div>
+                <div class="requirement" id="reqUppercase">
+                    <i class="fas fa-circle"></i>
+                    <span>至少1个大写字母</span>
+                </div>
+                <div class="requirement" id="reqNumber">
+                    <i class="fas fa-circle"></i>
+                    <span>至少1个数字</span>
+                </div>
+                <div class="requirement" id="reqSpecial">
+                    <i class="fas fa-circle"></i>
+                    <span>至少1个特殊字符</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-group full-width">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="confirmPassword" class="input1" placeholder="确认密码" autocomplete="new-password">
+            <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                <i class="fas fa-eye"></i>
+            </button>
+            <div id="confirmPasswordMsg" class="validation-message"></div>
+        </div>
+        
+        <div class="terms">
+            <input type="checkbox" id="acceptTerms">
+            <label for="acceptTerms">
+                我已阅读并同意 <a href="#" id="termsLink">服务条款</a> 和 <a href="#" id="privacyLink">隐私政策</a>
+            </label>
+            <div id="termsMsg" class="validation-message"></div>
+        </div>
+        
+        <button class="button1" id="registerBtn">注 册</button>
+        
+        <div class="extra">
+            已有账号? <a href="./login.html">立即登录</a>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const registerBtn = document.getElementById('registerBtn');
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
+            const acceptTermsCheckbox = document.getElementById('acceptTerms');
+            const registerMessage = document.getElementById('registerMessage');
+            const termsLink = document.getElementById('termsLink');
+            const privacyLink = document.getElementById('privacyLink');
+            const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+            const passwordStrengthText = document.getElementById('passwordStrengthText');
+            
+            // 密码强度要求元素
+            const reqLength = document.getElementById('reqLength');
+            const reqLowercase = document.getElementById('reqLowercase');
+            const reqUppercase = document.getElementById('reqUppercase');
+            const reqNumber = document.getElementById('reqNumber');
+            const reqSpecial = document.getElementById('reqSpecial');
+            
+            // 实时验证函数
+            function validateField(field, type) {
+                const value = field.value.trim();
+                let isValid = false;
+                let message = '';
+                
+                switch(type) {
+                    case 'firstName':
+                    case 'lastName':
+                        if (!value) {
+                            message = type === 'firstName' ? '请输入名字' : '请输入姓氏';
+                        } else if (value.length < 2) {
+                            message = '至少2个字符';
+                        } else if (!/^[a-zA-Z\u4e00-\u9fa5]+$/.test(value)) {
+                            message = '只能包含字母或中文';
+                        } else {
+                            isValid = true;
+                            message = '✓ 格式正确';
+                        }
+                        break;
+                        
+                    case 'email':
+                        if (!value) {
+                            message = '请输入邮箱地址';
+                        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                            message = '邮箱格式不正确';
+                        } else {
+                            isValid = true;
+                            message = '✓ 邮箱格式正确';
+                        }
+                        break;
+                        
+                    case 'phone':
+                        if (value && !/^[\+]?[1-9]\d{1,14}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
+                            message = '手机号码格式不正确';
+                        } else {
+                            isValid = true;
+                            if (value) message = '✓ 手机号码格式正确';
+                        }
+                        break;
+                        
+                    case 'username':
+                        if (!value) {
+                            message = '请输入用户名';
+                        } else if (value.length < 4) {
+                            message = '用户名至少4个字符';
+                        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                            message = '只能包含字母、数字和下划线';
+                        } else {
+                            isValid = true;
+                            message = '✓ 用户名可用';
+                        }
+                        break;
+                        
+                    case 'password':
+                        const passwordResults = checkPasswordStrength(value);
+                        updatePasswordRequirements(value);
+                        updatePasswordStrength(passwordResults.strength, passwordResults.score);
+                        
+                        if (!value) {
+                            message = '请输入密码';
+                        } else if (value.length < 8) {
+                            message = '密码至少8个字符';
+                        } else {
+                            isValid = passwordResults.score >= 3;
+                            message = isValid ? '✓ 密码强度足够' : '密码强度不足';
+                        }
+                        break;
+                        
+                    case 'confirmPassword':
+                        if (!value) {
+                            message = '请确认密码';
+                        } else if (value !== passwordInput.value) {
+                            message = '密码不匹配';
+                        } else {
+                            isValid = true;
+                            message = '✓ 密码匹配';
+                        }
+                        break;
+                }
+                
+                const msgElement = document.getElementById(`${type}Msg`);
+                msgElement.textContent = message;
+                msgElement.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
+                
+                return isValid;
+            }
+            
+            // 密码强度检查
+            function checkPasswordStrength(password) {
+                let score = 0;
+                let strength = '弱';
+                
+                if (!password) return { score: 0, strength: '弱' };
+                
+                // 长度检查
+                if (password.length >= 8) score++;
+                if (password.length >= 12) score++;
+                
+                // 小写字母检查
+                if (/[a-z]/.test(password)) score++;
+                
+                // 大写字母检查
+                if (/[A-Z]/.test(password)) score++;
+                
+                // 数字检查
+                if (/[0-9]/.test(password)) score++;
+                
+                // 特殊字符检查
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+                
+                // 确定强度等级
+                if (score >= 5) strength = '很强';
+                else if (score >= 4) strength = '强';
+                else if (score >= 3) strength = '中等';
+                
+                return { score, strength };
+            }
+            
+            // 更新密码强度显示
+            function updatePasswordStrength(strength, score) {
+                let width = 0;
+                let color = '#FF5252';
+                
+                if (score >= 5) {
+                    width = 100;
+                    color = '#4CAF50';
+                } else if (score >= 4) {
+                    width = 80;
+                    color = '#8BC34A';
+                } else if (score >= 3) {
+                    width = 60;
+                    color = '#FFC107';
+                } else if (score >= 2) {
+                    width = 40;
+                    color = '#FF9800';
+                } else if (score >= 1) {
+                    width = 20;
+                    color = '#FF5252';
+                }
+                
+                passwordStrengthBar.style.width = `${width}%`;
+                passwordStrengthBar.style.background = color;
+                passwordStrengthText.textContent = `密码强度: ${strength}`;
+                passwordStrengthText.style.color = color;
+            }
+            
+            // 更新密码要求显示
+            function updatePasswordRequirements(password) {
+                const requirements = {
+                    length: password.length >= 8,
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    number: /[0-9]/.test(password),
+                    special: /[^A-Za-z0-9]/.test(password)
+                };
+                
+                // 更新每个要求的显示
+                reqLength.className = `requirement ${requirements.length ? 'valid' : 'invalid'}`;
+                reqLength.querySelector('i').className = requirements.length ? 'fas fa-check-circle' : 'fas fa-circle';
+                
+                reqLowercase.className = `requirement ${requirements.lowercase ? 'valid' : 'invalid'}`;
+                reqLowercase.querySelector('i').className = requirements.lowercase ? 'fas fa-check-circle' : 'fas fa-circle';
+                
+                reqUppercase.className = `requirement ${requirements.uppercase ? 'valid' : 'invalid'}`;
+                reqUppercase.querySelector('i').className = requirements.uppercase ? 'fas fa-check-circle' : 'fas fa-circle';
+                
+                reqNumber.className = `requirement ${requirements.number ? 'valid' : 'invalid'}`;
+                reqNumber.querySelector('i').className = requirements.number ? 'fas fa-check-circle' : 'fas fa-circle';
+                
+                reqSpecial.className = `requirement ${requirements.special ? 'valid' : 'invalid'}`;
+                reqSpecial.querySelector('i').className = requirements.special ? 'fas fa-check-circle' : 'fas fa-circle';
+            }
+            
+            // 显示消息函数
+            function showMessage(message, type) {
+                registerMessage.textContent = message;
+                registerMessage.className = `register-message ${type}-message`;
+                registerMessage.style.display = 'block';
+                
+                if (type === 'error') {
+                    registerMessage.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        registerMessage.style.animation = '';
+                    }, 500);
+                }
+                
+                if (type === 'success') {
+                    registerMessage.style.animation = 'pulse 1s ease-in-out';
+                }
+            }
+            
+            // 表单验证
+            function validateForm() {
+                let isValid = true;
+                
+                // 验证所有字段
+                isValid = validateField(firstNameInput, 'firstName') && isValid;
+                isValid = validateField(lastNameInput, 'lastName') && isValid;
+                isValid = validateField(emailInput, 'email') && isValid;
+                isValid = validateField(phoneInput, 'phone') && isValid;
+                isValid = validateField(usernameInput, 'username') && isValid;
+                isValid = validateField(passwordInput, 'password') && isValid;
+                isValid = validateField(confirmPasswordInput, 'confirmPassword') && isValid;
+                
+                // 验证服务条款
+                const termsMsg = document.getElementById('termsMsg');
+                if (!acceptTermsCheckbox.checked) {
+                    termsMsg.textContent = '请同意服务条款和隐私政策';
+                    termsMsg.className = 'validation-message invalid';
+                    isValid = false;
+                } else {
+                    termsMsg.textContent = '';
+                    termsMsg.className = 'validation-message';
+                }
+                
+                return isValid;
+            }
+            
+            // 实时输入验证
+            firstNameInput.addEventListener('input', () => validateField(firstNameInput, 'firstName'));
+            lastNameInput.addEventListener('input', () => validateField(lastNameInput, 'lastName'));
+            emailInput.addEventListener('input', () => validateField(emailInput, 'email'));
+            phoneInput.addEventListener('input', () => validateField(phoneInput, 'phone'));
+            usernameInput.addEventListener('input', () => validateField(usernameInput, 'username'));
+            passwordInput.addEventListener('input', () => validateField(passwordInput, 'password'));
+            confirmPasswordInput.addEventListener('input', () => validateField(confirmPasswordInput, 'confirmPassword'));
+            
+            // 密码显示/隐藏切换
+            togglePasswordBtn.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            toggleConfirmPasswordBtn.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPasswordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // 服务条款和隐私政策链接
+            termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showMessage('服务条款页面正在开发中...', 'error');
+            });
+            
+            privacyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showMessage('隐私政策页面正在开发中...', 'error');
+            });
+            
+            // 注册按钮点击事件
+            registerBtn.addEventListener('click', function() {
+                if (!validateForm()) {
+                    showMessage('请填写正确的注册信息', 'error');
+                    return;
+                }
+                
+                // 模拟注册过程
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 注册中...';
+                
+                // 模拟API请求延迟
+                setTimeout(() => {
+                    // 收集表单数据
+                    const formData = {
+                        firstName: firstNameInput.value.trim(),
+                        lastName: lastNameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        phone: phoneInput.value.trim() ||null,
+                        username: usernameInput.value.trim(),
+                        password: passwordInput.value,
+                        acceptTerms: acceptTermsCheckbox.checked
+                    };
+                    
+                    // 这里应该是实际的注册逻辑
+                    // 模拟注册成功
+                    showMessage('注册成功！正在跳转到登录页面...', 'success');
+                    
+                    // 保存用户数据到本地存储（仅用于演示）
+                    localStorage.setItem('registeredUser', JSON.stringify({
+                        username: formData.username,
+                        email: formData.email
+                    }));
+                    
+                    // 模拟跳转到登录页面
+                    setTimeout(() => {
+                        window.location.href = './login.html';
+                    }, 2000);
+                }, 1500);
+            });
+            
+            // 回车键注册
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    registerBtn.click();
+                }
+            });
+            
+            // 页面加载动画
+            document.querySelector('.register-container').style.opacity = 0;
+            setTimeout(() => {
+                document.querySelector('.register-container').style.transition = 'opacity 0.8s ease';
+                document.querySelector('.register-container').style.opacity = 1;
+            }, 100);
+        });
+    </script>
+</body>
+</html>

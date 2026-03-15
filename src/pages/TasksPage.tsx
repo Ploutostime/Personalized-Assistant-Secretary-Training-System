@@ -80,7 +80,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all' | 'overdue'>('all');
   const [filterType, setFilterType] = useState<TaskType | 'all'>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -97,6 +97,60 @@ export default function TasksPage() {
     estimated_hours: '',
   });
 
+  const getAllowedStatuses = (current: TaskStatus): TaskStatus[] => {
+    switch (current) {
+      case 'pending':
+        return ['pending', 'in_progress', 'cancelled'];
+      case 'in_progress':
+        return ['in_progress', 'completed', 'cancelled'];
+      case 'completed':
+        return ['completed'];
+      case 'cancelled':
+        return ['cancelled'];
+      default:
+        return [current];
+    }
+  };
+
+  const buildStatusTransitionUpdates = (task: Task, newStatus: TaskStatus): Partial<Task> => {
+    const nowIso = new Date().toISOString();
+    const updates: Partial<Task> = { status: newStatus };
+
+    if (newStatus === 'in_progress') {
+      if (!task.start_time) {
+        updates.start_time = nowIso;
+      }
+      updates.end_time = null;
+      updates.actual_hours = null;
+    }
+
+    if (newStatus === 'completed') {
+      const endTime = nowIso;
+      updates.end_time = endTime;
+
+      const startTime = task.start_time;
+      if (startTime) {
+        const ms = new Date(endTime).getTime() - new Date(startTime).getTime();
+        const hours = Math.max(0, ms / (1000 * 60 * 60));
+        updates.actual_hours = Math.round(hours * 10) / 10;
+      }
+      updates.reminder_enabled = false;
+    }
+
+    if (newStatus === 'cancelled') {
+      updates.reminder_enabled = false;
+      updates.end_time = task.end_time || nowIso;
+    }
+
+    return updates;
+  };
+
+  const isTaskOverdue = (task: Task) => {
+    if (!task.deadline) return false;
+    if (task.status === 'completed' || task.status === 'cancelled') return false;
+    return new Date(task.deadline).getTime() < Date.now();
+  };
+
   useEffect(() => {
     if (!user) return;
     loadTasks();
@@ -105,7 +159,11 @@ export default function TasksPage() {
   useEffect(() => {
     let filtered = tasks;
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(t => t.status === filterStatus);
+      if (filterStatus === 'overdue') {
+        filtered = filtered.filter(t => isTaskOverdue(t));
+      } else {
+        filtered = filtered.filter(t => t.status === filterStatus);
+      }
     }
     if (filterType !== 'all') {
       filtered = filtered.filter(t => t.task_type === filterType);
@@ -157,13 +215,12 @@ export default function TasksPage() {
       return;
     }
 
-    const taskData = {
+    const baseTaskData = {
       user_id: user.id,
       title: formData.title.trim(),
       description: formData.description.trim() || null,
       task_type: formData.task_type,
       priority: formData.priority,
-      status: formData.status,
       deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
       estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
       start_time: null,
@@ -174,7 +231,15 @@ export default function TasksPage() {
     };
 
     if (editingTask) {
-      const success = await updateTask(editingTask.id, taskData);
+      const allowed = getAllowedStatuses(editingTask.status);
+      const requestedStatus = formData.status;
+      const nextStatus = allowed.includes(requestedStatus) ? requestedStatus : editingTask.status;
+      const statusUpdates = buildStatusTransitionUpdates(editingTask, nextStatus);
+      const updates: Partial<Task> = {
+        ...baseTaskData,
+        ...statusUpdates,
+      };
+      const success = await updateTask(editingTask.id, updates);
       if (success) {
         toast.success('任务更新成功');
         setDialogOpen(false);
@@ -183,7 +248,10 @@ export default function TasksPage() {
         toast.error('任务更新失败');
       }
     } else {
-      const result = await createTask(taskData);
+      const result = await createTask({
+        ...baseTaskData,
+        status: 'pending',
+      });
       if (result) {
         toast.success('任务创建成功');
         setDialogOpen(false);
@@ -208,7 +276,17 @@ export default function TasksPage() {
   };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    const success = await updateTask(taskId, { status: newStatus });
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const allowed = getAllowedStatuses(task.status);
+    if (!allowed.includes(newStatus)) {
+      toast.error('不允许的状态变更');
+      return;
+    }
+
+    const updates = buildStatusTransitionUpdates(task, newStatus);
+    const success = await updateTask(taskId, updates);
     if (success) {
       toast.success('状态更新成功');
       loadTasks();
@@ -317,12 +395,13 @@ export default function TasksPage() {
                   <Select
                     value={formData.status}
                     onValueChange={(value: TaskStatus) => setFormData({ ...formData, status: value })}
+                    disabled={!editingTask}
                   >
                     <SelectTrigger id="status">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map((option) => (
+                      {(editingTask ? statusOptions.filter(o => getAllowedStatuses(editingTask.status).includes(o.value)) : statusOptions.filter(o => o.value === 'pending')).map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -377,12 +456,13 @@ export default function TasksPage() {
         <CardContent className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <Label>状态：</Label>
-            <Select value={filterStatus} onValueChange={(value: TaskStatus | 'all') => setFilterStatus(value)}>
+            <Select value={filterStatus} onValueChange={(value: TaskStatus | 'all' | 'overdue') => setFilterStatus(value)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="overdue">逾期</SelectItem>
                 {statusOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -427,6 +507,11 @@ export default function TasksPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold">{task.title}</h3>
+                      {isTaskOverdue(task) && (
+                        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                          逾期
+                        </Badge>
+                      )}
                       <Badge variant="outline">{taskTypeOptions.find(t => t.value === task.task_type)?.label}</Badge>
                       <Badge className={priorityColors[task.priority]}>
                         {priorityOptions.find(p => p.value === task.priority)?.label}
@@ -459,11 +544,13 @@ export default function TasksPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
+                        {statusOptions
+                          .filter(option => getAllowedStatuses(task.status).includes(option.value))
+                          .map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
 

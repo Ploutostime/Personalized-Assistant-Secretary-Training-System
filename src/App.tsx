@@ -10,7 +10,7 @@ import { RouteGuard } from '@/components/common/RouteGuard';
 import { Toaster } from '@/components/ui/sonner';
 
 // 延迟加载页面组件
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DashboardPage = lazy(() => import('./pages/EnhancedDashboardPage'));
 const TasksPage = lazy(() => import('./pages/TasksPage'));
 const SchedulePage = lazy(() => import('./pages/SchedulePage'));
 const KnowledgePage = lazy(() => import('./pages/KnowledgePage'));

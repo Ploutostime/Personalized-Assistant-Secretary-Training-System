@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getTasks, getScheduleSettings } from '@/db/api';
+import { getTasks, getScheduleSettings, generateAndGetSchedule } from '@/db/api';
 import type { Task, ScheduleSettings } from '@/types/types';
-import { Calendar as CalendarIcon, Clock, AlertCircle } from 'lucide-react';
-import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
+import type { DailySchedule, ScheduledTask } from '@/utils/scheduler';
+import { Calendar as CalendarIcon, Clock, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
+import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
 const taskTypeLabels = {
@@ -25,11 +26,17 @@ const priorityColors = {
   urgent: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
+const isScheduledTask = (task: Task | ScheduledTask): task is ScheduledTask => {
+  return 'scheduled_start' in task;
+};
+
 export default function SchedulePage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [settings, setSettings] = useState<ScheduleSettings | null>(null);
+  const [autoSchedule, setAutoSchedule] = useState<DailySchedule[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   useEffect(() => {
@@ -52,10 +59,30 @@ export default function SchedulePage() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
   const getTasksForDay = (date: Date) => {
+    // 如果有自动生成的计划，优先显示计划
+    if (autoSchedule.length > 0) {
+      const daySchedule = autoSchedule.find(s => isSameDay(new Date(s.date), date));
+      if (daySchedule) return daySchedule.tasks;
+    }
+
     return tasks.filter(task => {
       if (!task.deadline) return false;
       return isSameDay(new Date(task.deadline), date);
     });
+  };
+
+  const handleGenerateSchedule = async () => {
+    if (!user) return;
+    setIsGenerating(true);
+    try {
+      // 修正：不再传入固定天数，由算法根据任务截止日期动态决定生成时长
+      const schedule = await generateAndGetSchedule(user.id, new Date());
+      setAutoSchedule(schedule);
+    } catch (error) {
+      console.error('生成时间表失败:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const goToPreviousWeek = () => {
@@ -87,6 +114,19 @@ export default function SchedulePage() {
           <p className="text-muted-foreground mt-1">查看你的学习计划和任务安排</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="default" 
+            onClick={handleGenerateSchedule}
+            disabled={isGenerating}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+          >
+            {isGenerating ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            一键智能生成
+          </Button>
           <Button variant="outline" onClick={goToPreviousWeek}>上一周</Button>
           <Button variant="outline" onClick={goToToday}>今天</Button>
           <Button variant="outline" onClick={goToNextWeek}>下一周</Button>
@@ -176,8 +216,26 @@ export default function SchedulePage() {
                                 <Badge variant="outline" className="text-xs">
                                   {taskTypeLabels[task.task_type]}
                                 </Badge>
+                                <Badge className={`text-xs ${priorityColors[task.priority]}`}>
+                                  {task.priority === 'urgent' ? '紧急' : 
+                                   task.priority === 'high' ? '高' : 
+                                   task.priority === 'medium' ? '中' : '低'}
+                                </Badge>
                               </div>
-                              {task.deadline && (
+                              {isScheduledTask(task) ? (
+                                <>
+                                  <div className="text-xs text-primary font-medium mt-1 flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {format(new Date(task.scheduled_start), 'HH:mm')} - {format(new Date(task.scheduled_end), 'HH:mm')}
+                                  </div>
+                                  {task.deadline && (
+                                    <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                                      <CalendarIcon className="h-2.5 w-2.5" />
+                                      截止: {format(new Date(task.deadline), 'MM-dd HH:mm')}
+                                    </div>
+                                  )}
+                                </>
+                              ) : task.deadline && (
                                 <div className="text-xs text-muted-foreground mt-1">
                                   {format(new Date(task.deadline), 'HH:mm', { locale: zhCN })}
                                 </div>
